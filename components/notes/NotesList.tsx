@@ -1,0 +1,117 @@
+'use client'
+
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
+import { Plus, FileText } from 'lucide-react'
+import { NoteItem } from './NoteItem'
+import type { Note, Project } from '@/types'
+
+interface NotesListProps {
+  project: Project | null
+  notes: Note[]
+  activeNoteId: string | null
+  loading: boolean
+  onSelectNote: (id: string) => void
+  onCreateNote: () => void
+  onReorderNotes: (notes: Note[]) => void
+}
+
+export function NotesList({
+  project,
+  notes,
+  activeNoteId,
+  loading,
+  onSelectNote,
+  onCreateNote,
+  onReorderNotes,
+}: NotesListProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = notes.findIndex(n => n.id === active.id)
+    const newIndex = notes.findIndex(n => n.id === over.id)
+    onReorderNotes(arrayMove(notes, oldIndex, newIndex))
+  }
+
+  if (!project) {
+    return (
+      <div className="w-[300px] flex-shrink-0 flex flex-col items-center justify-center border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] gap-2">
+        <FileText size={28} className="text-[var(--color-text-muted)]" style={{ opacity: 0.5 }} />
+        <p className="text-xs text-[var(--color-text-muted)]">Select a project</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
+      {/* Header */}
+      <div
+        className="px-4 py-3.5 border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0"
+        style={{ backgroundColor: `${project.color}14` }}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
+            {project.name}
+          </h2>
+        </div>
+        <button
+          onClick={onCreateNote}
+          title="New note"
+          className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
+        >
+          <Plus size={16} />
+        </button>
+      </div>
+
+      {/* Notes */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {loading ? (
+          <div className="flex items-center justify-center h-16">
+            <p className="text-xs text-[var(--color-text-muted)]">Loading…</p>
+          </div>
+        ) : notes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-32 gap-2">
+            <p className="text-sm text-[var(--color-text-muted)]">No notes yet</p>
+            <button
+              onClick={onCreateNote}
+              className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors"
+            >
+              Create one
+            </button>
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={notes.map(n => n.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {notes.map(note => (
+                <NoteItem
+                  key={note.id}
+                  note={note}
+                  isActive={note.id === activeNoteId}
+                  onSelect={onSelectNote}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
+    </div>
+  )
+}
