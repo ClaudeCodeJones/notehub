@@ -37,7 +37,13 @@ export function EditorPanel({ note, onUpdate, onUpdateNoteType, onMobileBack }: 
     extensions: [
       StarterKit,
       TaskList,
-      TaskItem.configure({ nested: true }),
+      TaskItem.configure({ nested: true }).extend({
+        addKeyboardShortcuts() {
+          return {
+            Enter: () => this.editor.commands.splitListItem('taskItem'),
+          }
+        },
+      }),
       TextStyle,
       Color,
       Placeholder.configure({
@@ -158,7 +164,17 @@ return (
       {/* Note type pill bar */}
       <div className="px-8 pb-4 flex-shrink-0">
         <div className="flex items-center gap-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-full px-3 py-1.5 max-w-xs">
-          <span className="flex-1 text-sm text-[var(--color-text-muted)]">+ Add text</span>
+          <button
+            onClick={() => {
+              if (!editor) return
+              if (note.note_type === 'checkbox') {
+                editor.chain().focus('end').splitListItem('taskItem').run()
+              } else {
+                editor.chain().focus('end').insertContent({ type: 'paragraph' }).run()
+              }
+            }}
+            className="flex-1 text-sm text-[var(--color-text-muted)] text-left"
+          >+ Add text</button>
           {note.note_type === 'checkbox'
             ? <CheckSquare size={14} className="text-[var(--color-text-muted)]" />
             : <FileText size={14} className="text-[var(--color-text-muted)]" />
@@ -204,14 +220,10 @@ return (
 
       {/* Rich text editor */}
       <div className="flex-1 overflow-y-auto px-8 py-2 min-h-0">
-        {note.note_type === 'note' ? (
-          <div className="flex items-start gap-2">
-            <FileText className="w-3.5 h-3.5 mt-1 flex-shrink-0 text-[var(--color-text-muted)]" />
-            <EditorContent editor={editor} className="notehub-editor flex-1" />
-          </div>
-        ) : (
-          <EditorContent editor={editor} className="notehub-editor" />
-        )}
+        <EditorContent
+          editor={editor}
+          className={cn('notehub-editor', note.note_type === 'note' && 'notehub-note-editor')}
+        />
       </div>
 
       {/* Footer: save status */}
