@@ -16,6 +16,7 @@ import { useBookmarkCollections } from '@/hooks/useBookmarkCollections'
 import { useBookmarks } from '@/hooks/useBookmarks'
 import { useRecents } from '@/hooks/useRecents'
 import { useVaultItems } from '@/hooks/useVaultItems'
+import { useSwipeBack } from '@/hooks/useSwipeBack'
 
 type MobileView = 'sidebar' | 'notes' | 'editor'
 
@@ -132,6 +133,8 @@ export function AppShell() {
     if (mobileView === 'editor') setMobileView('notes')
     else if (mobileView === 'notes') setMobileView('sidebar')
   }
+
+  useSwipeBack(handleMobileBack, mobileView !== 'sidebar')
 
   async function handleCreateNote(type: 'checkbox' | 'note' = 'note') {
     const note = await createNote(type)
