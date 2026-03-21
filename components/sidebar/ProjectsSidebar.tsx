@@ -23,11 +23,14 @@ interface ProjectsSidebarProps {
   onSelectProject: (id: string) => void
   onCreateProject: (name: string) => Promise<Project | null>
   onReorderProjects: (projects: Project[]) => void
+  onUpdateProject: (id: string, color: string) => void
+  onRenameProject: (id: string, name: string) => void
   collections: BookmarkCollection[]
   activeCollectionId: string | null
   onSelectCollection: (id: string) => void
   onCreateCollection: (name: string) => Promise<BookmarkCollection | null>
   onReorderCollections: (collections: BookmarkCollection[]) => void
+  onUpdateCollection: (id: string, color: string) => void
 }
 
 export function ProjectsSidebar({
@@ -36,11 +39,14 @@ export function ProjectsSidebar({
   onSelectProject,
   onCreateProject,
   onReorderProjects,
+  onUpdateProject,
+  onRenameProject,
   collections,
   activeCollectionId,
   onSelectCollection,
   onCreateCollection,
   onReorderCollections,
+  onUpdateCollection,
 }: ProjectsSidebarProps) {
   const [isCreatingProject, setIsCreatingProject] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
@@ -114,21 +120,22 @@ export function ProjectsSidebar({
   }
 
   return (
-    <aside className="w-[220px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full">
+    <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full">
       {/* Logo */}
-      <div className="px-4 py-3 border-b border-[var(--color-border)]">
+      <div className="px-4 h-16 border-b border-[var(--color-border)] flex items-center">
         <Image
-          src="/notehub_logo.jpeg"
+          src="/notehub_logo_v4.png"
           alt="NoteHUB"
-          width={120}
-          height={0}
-          style={{ height: 'auto' }}
+          width={140}
+          height={46}
+          quality={100}
+          style={{ objectFit: 'contain' }}
           priority
         />
       </div>
 
       {/* Scrollable content: projects + bookmarks */}
-      <div className="flex-1 overflow-y-auto p-2 min-h-0">
+      <div className="flex-1 overflow-y-auto p-2 pb-4 min-h-0">
 
         {/* ── Projects ── */}
         <div className="flex items-center justify-between px-2 py-1.5 mb-0.5">
@@ -144,7 +151,7 @@ export function ProjectsSidebar({
           </button>
         </div>
 
-        <div className="px-2">
+        <div className="px-2 flex flex-col gap-1">
           <DndContext
             sensors={projectSensors}
             collisionDetection={closestCenter}
@@ -160,6 +167,8 @@ export function ProjectsSidebar({
                   project={project}
                   isActive={project.id === activeProjectId}
                   onSelect={onSelectProject}
+                  onUpdateColor={(color) => onUpdateProject(project.id, color)}
+                  onRename={(name) => onRenameProject(project.id, name)}
                 />
               ))}
             </SortableContext>
@@ -216,14 +225,17 @@ export function ProjectsSidebar({
             items={collections.map(c => c.id)}
             strategy={verticalListSortingStrategy}
           >
+          <div className="px-2 flex flex-col gap-1">
             {collections.map(collection => (
               <CollectionItem
                 key={collection.id}
                 collection={collection}
                 isActive={collection.id === activeCollectionId}
                 onSelect={onSelectCollection}
+                onUpdateColor={(color) => onUpdateCollection(collection.id, color)}
               />
             ))}
+          </div>
           </SortableContext>
         </DndContext>
 

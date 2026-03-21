@@ -9,7 +9,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-import { Plus, FileText } from 'lucide-react'
+import { Plus, FileText, ChevronLeft } from 'lucide-react'
 import { NoteItem } from './NoteItem'
 import type { Note, Project } from '@/types'
 
@@ -20,7 +20,9 @@ interface NotesListProps {
   loading: boolean
   onSelectNote: (id: string) => void
   onCreateNote: () => void
+  onDeleteNote: (id: string) => Promise<void>
   onReorderNotes: (notes: Note[]) => void
+  onMobileBack?: () => void
 }
 
 export function NotesList({
@@ -30,7 +32,9 @@ export function NotesList({
   loading,
   onSelectNote,
   onCreateNote,
+  onDeleteNote,
   onReorderNotes,
+  onMobileBack,
 }: NotesListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -46,7 +50,7 @@ export function NotesList({
 
   if (!project) {
     return (
-      <div className="w-[300px] flex-shrink-0 flex flex-col items-center justify-center border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] gap-2">
+      <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col items-center justify-center border-r border-[var(--color-border)] bg-[#e8e8e8] h-full gap-2">
         <FileText size={28} className="text-[var(--color-text-muted)]" style={{ opacity: 0.5 }} />
         <p className="text-xs text-[var(--color-text-muted)]">Select a project</p>
       </div>
@@ -54,14 +58,17 @@ export function NotesList({
   }
 
   return (
-    <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
+    <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[#e8e8e8] h-full">
       {/* Header */}
-      <div
-        className="px-4 py-3.5 border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0"
-        style={{ backgroundColor: `${project.color}14` }}
-      >
+      <div className="px-4 h-16 border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
+          <button
+            onClick={onMobileBack}
+            className="md:hidden p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <h2 className="text-base font-semibold text-[var(--color-text-primary)] truncate">
             {project.name}
           </h2>
         </div>
@@ -105,7 +112,9 @@ export function NotesList({
                   key={note.id}
                   note={note}
                   isActive={note.id === activeNoteId}
+                  projectColor={project.color}
                   onSelect={onSelectNote}
+                  onDelete={onDeleteNote}
                 />
               ))}
             </SortableContext>

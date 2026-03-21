@@ -1,11 +1,27 @@
 export const PROJECT_COLORS = [
-  '#7F77DD', // purple
-  '#1D9E75', // teal
-  '#D85A30', // coral
-  '#D4537E', // pink
-  '#378ADD', // blue
-  '#BA7517', // amber
-  '#639922', // green
-  '#E24B4A', // red
-  '#888780', // gray
+  '#E63946', // red
+  '#E76F51', // burnt orange
+  '#F4A261', // orange
+  '#E9C46A', // yellow
+  '#2A9D8F', // teal
+  '#57CC99', // mint
+  '#06D6A0', // emerald
+  '#1D9E75', // forest teal
+  '#4CC9F0', // sky blue
+  '#4361EE', // royal blue
+  '#3A0CA3', // indigo
+  '#7209B7', // purple
+  '#B5179E', // magenta
+  '#F72585', // hot pink
+  '#FF6B9D', // pink
+  '#FF9F1C', // amber
+  '#CBFF8C', // lime
+  '#8AC926', // green
+  '#52B788', // sage
+  '#40916C', // dark green
+  '#6D6875', // mauve
+  '#B4838D', // dusty rose
+  '#E07A5F', // terra cotta
+  '#3D405B', // dark slate
+  '#118AB2', // ocean blue
 ]

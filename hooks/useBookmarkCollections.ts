@@ -45,5 +45,10 @@ export function useBookmarkCollections() {
     )
   }, [])
 
-  return { collections, loading, error, createCollection, reorderCollections }
+  const updateBookmarkCollection = useCallback(async (id: string, color: string) => {
+    setCollections(prev => prev.map(c => c.id === id ? { ...c, color } : c))
+    await supabase.from('bookmark_collections').update({ color }).eq('id', id)
+  }, [])
+
+  return { collections, loading, error, createCollection, reorderCollections, updateBookmarkCollection }
 }

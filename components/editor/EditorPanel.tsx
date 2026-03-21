@@ -6,23 +6,21 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
-import { Trash2 } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { Toolbar } from './Toolbar'
-import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
 
 interface EditorPanelProps {
   note: Note
   onUpdate: (id: string, updates: Partial<Pick<Note, 'title' | 'content'>>) => Promise<void>
-  onDelete: (id: string) => Promise<void>
+  onMobileBack?: () => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved'
 
-export function EditorPanel({ note, onUpdate, onDelete }: EditorPanelProps) {
+export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) {
   const [title, setTitle] = useState(note.title)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
-  const [confirmDelete, setConfirmDelete] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
   const titleTimer = useRef<NodeJS.Timeout | null>(null)
   const contentTimer = useRef<NodeJS.Timeout | null>(null)
@@ -83,16 +81,21 @@ export function EditorPanel({ note, onUpdate, onDelete }: EditorPanelProps) {
     }
   }
 
-  async function handleDelete() {
-    if (!confirmDelete) {
-      setConfirmDelete(true)
-      return
-    }
-    await onDelete(note.id)
-  }
-
-  return (
+return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-primary)] h-full overflow-hidden">
+      {/* Mobile header */}
+      <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] flex-shrink-0">
+        <button
+          onClick={onMobileBack}
+          className="p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
+          {title || 'Untitled'}
+        </span>
+      </div>
+
       {/* Formatting toolbar */}
       <Toolbar editor={editor} />
 
@@ -114,26 +117,12 @@ export function EditorPanel({ note, onUpdate, onDelete }: EditorPanelProps) {
         <EditorContent editor={editor} className="notehub-editor" />
       </div>
 
-      {/* Footer: save status + delete */}
-      <div className="px-8 py-3 border-t border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+      {/* Footer: save status */}
+      <div className="px-8 py-3 border-t border-[var(--color-border)] flex items-center flex-shrink-0">
         <span className="text-xs text-[var(--color-text-muted)]">
           {saveStatus === 'saving' && 'Saving…'}
           {saveStatus === 'saved' && 'Saved'}
         </span>
-
-        <button
-          onClick={handleDelete}
-          onBlur={() => setTimeout(() => setConfirmDelete(false), 150)}
-          className={cn(
-            'flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md transition-colors',
-            confirmDelete
-              ? 'bg-red-500 text-white hover:bg-red-600'
-              : 'text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30'
-          )}
-        >
-          <Trash2 size={12} />
-          {confirmDelete ? 'Are you sure?' : 'Delete'}
-        </button>
       </div>
     </div>
   )

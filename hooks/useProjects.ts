@@ -46,6 +46,16 @@ export function useProjects() {
     )
   }, [])
 
+  const updateProject = useCallback(async (id: string, color: string) => {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, color } : p))
+    await supabase.from('projects').update({ color }).eq('id', id)
+  }, [])
+
+  const renameProject = useCallback(async (id: string, name: string) => {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, name } : p))
+    await supabase.from('projects').update({ name }).eq('id', id)
+  }, [])
+
   const updateFromRealtime = useCallback((updated: Project) => {
     setProjects(prev => prev.map(p => (p.id === updated.id ? updated : p)))
   }, [])
@@ -66,6 +76,8 @@ export function useProjects() {
     loading,
     error,
     createProject,
+    updateProject,
+    renameProject,
     reorderProjects,
     updateFromRealtime,
     insertFromRealtime,

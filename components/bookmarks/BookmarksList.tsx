@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-import { Plus, Bookmark } from 'lucide-react'
+import { Plus, Bookmark, ChevronLeft } from 'lucide-react'
 import { BookmarkItem } from './BookmarkItem'
 import type { Bookmark as BookmarkType, BookmarkCollection } from '@/types'
 
@@ -22,6 +22,7 @@ interface BookmarksListProps {
   onSelectBookmark: (id: string) => void
   onCreateBookmark: (url: string) => Promise<BookmarkType | null>
   onReorderBookmarks: (bookmarks: BookmarkType[]) => void
+  onMobileBack?: () => void
 }
 
 export function BookmarksList({
@@ -32,6 +33,7 @@ export function BookmarksList({
   onSelectBookmark,
   onCreateBookmark,
   onReorderBookmarks,
+  onMobileBack,
 }: BookmarksListProps) {
   const [isAdding, setIsAdding] = useState(false)
   const [newUrl, setNewUrl] = useState('')
@@ -78,7 +80,7 @@ export function BookmarksList({
 
   if (!collection) {
     return (
-      <div className="w-[300px] flex-shrink-0 flex flex-col items-center justify-center border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] gap-2">
+      <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col items-center justify-center border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full gap-2">
         <Bookmark size={28} className="text-[var(--color-text-muted)]" style={{ opacity: 0.4 }} />
         <p className="text-xs text-[var(--color-text-muted)]">Select a collection</p>
       </div>
@@ -86,10 +88,16 @@ export function BookmarksList({
   }
 
   return (
-    <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
+    <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
       {/* Header */}
       <div className="px-4 py-3.5 border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
+          <button
+            onClick={onMobileBack}
+            className="md:hidden p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
+          >
+            <ChevronLeft size={20} />
+          </button>
           <Bookmark size={14} className="flex-shrink-0 text-[var(--color-text-muted)]" />
           <h2 className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
             {collection.name}
