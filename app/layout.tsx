@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'NoteHUB',
   description: 'Personal note-taking with real-time sync',
+  icons: {
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export const viewport = {
