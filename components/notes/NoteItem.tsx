@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Trash2 } from 'lucide-react'
+import { Archive } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
 
@@ -12,11 +12,10 @@ interface NoteItemProps {
   isActive: boolean
   projectColor: string
   onSelect: (id: string) => void
-  onDelete: (id: string) => Promise<void>
+  onArchive: (id: string) => Promise<void>
 }
 
-export function NoteItem({ note, isActive, projectColor, onSelect, onDelete }: NoteItemProps) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
+export function NoteItem({ note, isActive, projectColor, onSelect, onArchive }: NoteItemProps) {
   const [isHovered, setIsHovered] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: note.id,
@@ -41,11 +40,7 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onDelete }: N
 
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation()
-    if (!confirmDelete) {
-      setConfirmDelete(true)
-      return
-    }
-    onDelete(note.id)
+    onArchive(note.id)
   }
 
   return (
@@ -58,7 +53,7 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onDelete }: N
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        'group flex items-center gap-2 px-4 py-4 border-b border-[var(--color-border)] cursor-pointer select-none transition-colors',
+        'group flex items-center gap-2 px-4 py-1.5 border-b border-[var(--color-border)] cursor-pointer select-none transition-colors',
         isDragging && 'opacity-40'
       )}
     >
@@ -72,17 +67,9 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onDelete }: N
       <button
         onClick={handleDelete}
         onPointerDown={e => e.stopPropagation()}
-        onBlur={() => setTimeout(() => setConfirmDelete(false), 150)}
-        className={cn(
-          'flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors flex-shrink-0',
-          confirmDelete
-            ? 'bg-red-500 text-white'
-            : 'text-[var(--color-text-muted)] hover:text-red-500',
-          !confirmDelete && 'opacity-0 group-hover:opacity-100',
-        )}
+        className="flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 text-[var(--color-text-muted)] hover:text-red-500"
       >
-        <Trash2 size={15} />
-        {confirmDelete && 'Sure?'}
+        <Archive size={15} />
       </button>
     </div>
   )

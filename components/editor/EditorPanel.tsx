@@ -1,26 +1,34 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
-import { ChevronLeft } from 'lucide-react'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import { ChevronLeft, FileText, CheckSquare, ChevronDown } from 'lucide-react'
 import { Toolbar } from './Toolbar'
+import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
+
+const NOTE_TYPE_KEY = 'notehub-last-note-type'
 
 interface EditorPanelProps {
   note: Note
   onUpdate: (id: string, updates: Partial<Pick<Note, 'title' | 'content'>>) => Promise<void>
+  onUpdateNoteType: (id: string, note_type: 'checkbox' | 'note') => Promise<void>
   onMobileBack?: () => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved'
 
-export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) {
+export function EditorPanel({ note, onUpdate, onUpdateNoteType, onMobileBack }: EditorPanelProps) {
   const [title, setTitle] = useState(note.title)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const [typeDropdownOpen, setTypeDropdownOpen] = useState(false)
+  const typeDropdownRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLInputElement>(null)
   const titleTimer = useRef<NodeJS.Timeout | null>(null)
   const contentTimer = useRef<NodeJS.Timeout | null>(null)
@@ -30,6 +38,8 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
       StarterKit,
       TaskList,
       TaskItem.configure({ nested: true }),
+      TextStyle,
+      Color,
       Placeholder.configure({
         placeholder: ({ node }) => {
           if (node.type.name === 'taskItem') return "Press 'Enter' to add list item"
@@ -41,11 +51,11 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
     content: (() => { try { return JSON.parse(note.content) } catch { return note.content || '' } })(),
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML()
+      const json = JSON.stringify(editor.getJSON())
       if (contentTimer.current) clearTimeout(contentTimer.current)
       setSaveStatus('saving')
       contentTimer.current = setTimeout(async () => {
-        await onUpdate(note.id, { content: html })
+        await onUpdate(note.id, { content: json })
         setSaveStatus('saved')
         setTimeout(() => setSaveStatus('idle'), 2000)
       }, 600)
@@ -67,6 +77,33 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
       if (contentTimer.current) clearTimeout(contentTimer.current)
     }
   }, [])
+
+  useEffect(() => {
+    if (!typeDropdownOpen) return
+    function handleOutside(e: MouseEvent) {
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target as Node)) {
+        setTypeDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [typeDropdownOpen])
+
+  const CHECKBOX_CONTENT = '{"type":"doc","content":[{"type":"taskList","content":[{"type":"taskItem","attrs":{"checked":false},"content":[{"type":"paragraph"}]}]}]}'
+  const NOTE_CONTENT = '{"type":"doc","content":[{"type":"paragraph"}]}'
+
+  const handleSelectNoteType = useCallback(async (type: 'checkbox' | 'note') => {
+    setTypeDropdownOpen(false)
+    localStorage.setItem(NOTE_TYPE_KEY, type)
+    const newContent = type === 'checkbox' ? CHECKBOX_CONTENT : NOTE_CONTENT
+    if (editor) {
+      editor.commands.setContent(JSON.parse(newContent))
+    }
+    await Promise.all([
+      onUpdateNoteType(note.id, type),
+      onUpdate(note.id, { content: newContent }),
+    ])
+  }, [note.id, onUpdateNoteType, onUpdate, editor]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value
@@ -118,9 +155,63 @@ return (
         />
       </div>
 
+      {/* Note type pill bar */}
+      <div className="px-8 pb-4 flex-shrink-0">
+        <div className="flex items-center gap-2 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-full px-3 py-1.5 max-w-xs">
+          <span className="flex-1 text-sm text-[var(--color-text-muted)]">+ Add text</span>
+          {note.note_type === 'checkbox'
+            ? <CheckSquare size={14} className="text-[var(--color-text-muted)]" />
+            : <FileText size={14} className="text-[var(--color-text-muted)]" />
+          }
+          <div ref={typeDropdownRef} className="relative">
+            <button
+              onClick={() => setTypeDropdownOpen(v => !v)}
+              className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+            >
+              <ChevronDown size={14} />
+            </button>
+            {typeDropdownOpen && (
+              <div className="absolute top-full right-0 mt-2 z-50 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg shadow-lg py-1 min-w-[130px]">
+                <button
+                  onClick={() => handleSelectNoteType('checkbox')}
+                  className={cn(
+                    'w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors',
+                    note.note_type === 'checkbox'
+                      ? 'text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
+                  )}
+                >
+                  <CheckSquare size={14} />
+                  Checkbox
+                </button>
+                <button
+                  onClick={() => handleSelectNoteType('note')}
+                  className={cn(
+                    'w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors',
+                    note.note_type === 'note'
+                      ? 'text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
+                  )}
+                >
+                  <FileText size={14} />
+                  Note
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Rich text editor */}
       <div className="flex-1 overflow-y-auto px-8 py-2 min-h-0">
-        <EditorContent editor={editor} className="notehub-editor" />
+        {note.note_type === 'note' ? (
+          <div className="flex items-start gap-2">
+            <FileText className="w-3.5 h-3.5 mt-1 flex-shrink-0 text-[var(--color-text-muted)]" />
+            <EditorContent editor={editor} className="notehub-editor flex-1" />
+          </div>
+        ) : (
+          <EditorContent editor={editor} className="notehub-editor" />
+        )}
       </div>
 
       {/* Footer: save status */}

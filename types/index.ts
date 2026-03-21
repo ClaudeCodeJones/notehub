@@ -12,6 +12,17 @@ export interface Note {
   project_id: string
   title: string
   content: string
+  note_type: 'checkbox' | 'note'
+  sort_order: number
+  created_at: string
+  updated_at: string
+  archived_at: string | null
+}
+
+export interface VaultItem {
+  id: string
+  name: string
+  color: string
   sort_order: number
   created_at: string
   updated_at: string
@@ -35,4 +46,5 @@ export interface Bookmark {
   sort_order: number
   created_at: string
   updated_at: string
+  archived_at: string | null
 }

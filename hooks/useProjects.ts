@@ -11,6 +11,8 @@ export function useProjects() {
   const [error, setError] = useState<string | null>(null)
   const lengthRef = useRef(0)
   lengthRef.current = projects.length
+  const projectsRef = useRef<Project[]>([])
+  projectsRef.current = projects
 
   useEffect(() => {
     supabase
@@ -25,7 +27,10 @@ export function useProjects() {
   }, [])
 
   const createProject = useCallback(async (name: string): Promise<Project | null> => {
-    const color = PROJECT_COLORS[lengthRef.current % PROJECT_COLORS.length]
+    const usedColors = new Set(projectsRef.current.map(p => p.color))
+    const color =
+      PROJECT_COLORS.find(c => !usedColors.has(c)) ??
+      PROJECT_COLORS[lengthRef.current % PROJECT_COLORS.length]
     const sort_order = lengthRef.current
     const { data, error } = await supabase
       .from('projects')

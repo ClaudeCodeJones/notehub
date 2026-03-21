@@ -24,6 +24,7 @@ export function useBookmarks(collectionId: string | null) {
       .from('bookmarks')
       .select('*')
       .eq('collection_id', collectionId)
+      .is('archived_at', null)
       .order('sort_order', { ascending: true })
       .then(({ data, error }) => {
         if (error) setError(error.message)
@@ -75,9 +76,9 @@ export function useBookmarks(collectionId: string | null) {
     return data
   }, [])
 
-  const deleteBookmark = useCallback(async (id: string) => {
+  const archiveBookmark = useCallback(async (id: string) => {
     setBookmarks(prev => prev.filter(b => b.id !== id))
-    await supabase.from('bookmarks').delete().eq('id', id)
+    await supabase.from('bookmarks').update({ archived_at: new Date().toISOString() }).eq('id', id)
   }, [])
 
   const reorderBookmarks = useCallback(async (reordered: Bookmark[]) => {
@@ -89,5 +90,5 @@ export function useBookmarks(collectionId: string | null) {
     )
   }, [])
 
-  return { bookmarks, loading, error, createBookmark, deleteBookmark, reorderBookmarks }
+  return { bookmarks, loading, error, createBookmark, archiveBookmark, reorderBookmarks }
 }

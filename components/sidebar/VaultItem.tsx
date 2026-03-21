@@ -4,27 +4,31 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Bookmark } from 'lucide-react'
+import { Vault } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PROJECT_COLORS } from '@/lib/constants'
-import type { BookmarkCollection } from '@/types'
+import type { VaultItem as VaultItemType } from '@/types'
 
-interface CollectionItemProps {
-  collection: BookmarkCollection
+interface VaultItemProps {
+  item: VaultItemType
   isActive: boolean
   onSelect: (id: string) => void
   onUpdateColor: (color: string) => void
+  onRename: (name: string) => void
 }
 
-export function CollectionItem({ collection, isActive, onSelect, onUpdateColor }: CollectionItemProps) {
+export function VaultItem({ item, isActive, onSelect, onUpdateColor, onRename }: VaultItemProps) {
   const [mounted, setMounted] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [showPicker, setShowPicker] = useState(false)
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 })
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(item.name)
+  const inputRef = useRef<HTMLInputElement>(null)
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: collection.id,
+    id: item.id,
   })
 
   const style = {
@@ -65,6 +69,30 @@ export function CollectionItem({ collection, isActive, onSelect, onUpdateColor }
     setShowPicker(false)
   }
 
+  function handleDoubleClick(e: React.MouseEvent) {
+    e.stopPropagation()
+    setEditName(item.name)
+    setIsEditing(true)
+  }
+
+  function handleRenameSave() {
+    const trimmed = editName.trim()
+    if (trimmed && trimmed !== item.name) onRename(trimmed)
+    setIsEditing(false)
+  }
+
+  function handleRenameKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') { e.preventDefault(); handleRenameSave() }
+    if (e.key === 'Escape') { setEditName(item.name); setIsEditing(false) }
+  }
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [isEditing])
+
   useEffect(() => {
     if (!showPicker) return
     function handleOutside() { setShowPicker(false) }
@@ -84,20 +112,37 @@ export function CollectionItem({ collection, isActive, onSelect, onUpdateColor }
         ref={setNodeRef}
         style={style}
         {...attributes}
-        {...listeners}
-        onClick={() => onSelect(collection.id)}
+        {...(isEditing ? {} : listeners)}
+        onClick={isEditing ? undefined : () => onSelect(item.id)}
+        onDoubleClick={isEditing ? undefined : handleDoubleClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onContextMenu={handleContextMenu}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchEnd}
-        className="flex items-center gap-2 h-8 px-3 rounded-lg cursor-pointer select-none transition-colors overflow-hidden"
+        onContextMenu={isEditing ? undefined : handleContextMenu}
+        onTouchStart={isEditing ? undefined : handleTouchStart}
+        onTouchEnd={isEditing ? undefined : handleTouchEnd}
+        onTouchMove={isEditing ? undefined : handleTouchEnd}
+        className={cn(
+          'flex items-center gap-2 h-8 px-3 rounded-lg select-none transition-colors overflow-hidden',
+          isEditing ? 'cursor-text' : 'cursor-pointer'
+        )}
       >
-        <Bookmark size={14} className="flex-shrink-0" style={{ color: collection.color }} />
-        <span className={cn('text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
-          {collection.name}
-        </span>
+        <Vault size={15} className="flex-shrink-0" style={{ color: item.color }} />
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={editName}
+            onChange={e => setEditName(e.target.value)}
+            onKeyDown={handleRenameKeyDown}
+            onBlur={handleRenameSave}
+            onPointerDown={e => e.stopPropagation()}
+            className="w-full text-sm bg-transparent outline-none border-none text-[var(--color-text-primary)]"
+          />
+        ) : (
+          <span className={cn('text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
+            {item.name || 'Untitled'}
+          </span>
+        )}
       </div>
 
       {showPicker && mounted && createPortal(
@@ -113,7 +158,7 @@ export function CollectionItem({ collection, isActive, onSelect, onUpdateColor }
               style={{ backgroundColor: color, width: 24, height: 24, borderRadius: '50%' }}
               className={cn(
                 'flex-shrink-0 transition-transform hover:scale-110',
-                collection.color === color && 'ring-2 ring-offset-1 ring-[var(--color-text-primary)]'
+                item.color === color && 'ring-2 ring-offset-1 ring-[var(--color-text-primary)]'
               )}
             />
           ))}

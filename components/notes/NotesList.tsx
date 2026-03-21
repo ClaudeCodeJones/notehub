@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -11,16 +12,19 @@ import {
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { Plus, FileText, ChevronLeft } from 'lucide-react'
 import { NoteItem } from './NoteItem'
-import type { Note, Project } from '@/types'
+import type { Note, Project, VaultItem } from '@/types'
+
+type NoteType = 'checkbox' | 'note'
+const STORAGE_KEY = 'notehub-last-note-type'
 
 interface NotesListProps {
-  project: Project | null
+  project: Project | VaultItem | null
   notes: Note[]
   activeNoteId: string | null
   loading: boolean
   onSelectNote: (id: string) => void
-  onCreateNote: () => void
-  onDeleteNote: (id: string) => Promise<void>
+  onCreateNote: (type: NoteType) => void
+  onArchiveNote: (id: string) => Promise<void>
   onReorderNotes: (notes: Note[]) => void
   onMobileBack?: () => void
 }
@@ -32,13 +36,20 @@ export function NotesList({
   loading,
   onSelectNote,
   onCreateNote,
-  onDeleteNote,
+  onArchiveNote,
   onReorderNotes,
   onMobileBack,
 }: NotesListProps) {
+  const [lastType, setLastType] = useState<NoteType>('checkbox')
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   )
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored === 'note' || stored === 'checkbox') setLastType(stored)
+  }, [])
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -74,7 +85,7 @@ export function NotesList({
           </h2>
         </div>
         <button
-          onClick={onCreateNote}
+          onClick={() => onCreateNote(lastType)}
           title="New note"
           className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
         >
@@ -91,12 +102,6 @@ export function NotesList({
         ) : notes.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
             <p className="text-sm text-[var(--color-text-muted)]">No notes yet</p>
-            <button
-              onClick={onCreateNote}
-              className="text-xs text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors"
-            >
-              Create one
-            </button>
           </div>
         ) : (
           <DndContext
@@ -115,13 +120,14 @@ export function NotesList({
                   isActive={note.id === activeNoteId}
                   projectColor={project.color}
                   onSelect={onSelectNote}
-                  onDelete={onDeleteNote}
+                  onArchive={onArchiveNote}
                 />
               ))}
             </SortableContext>
           </DndContext>
         )}
       </div>
+
     </div>
   )
 }

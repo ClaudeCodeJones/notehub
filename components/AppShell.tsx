@@ -8,11 +8,14 @@ import { NotesList } from './notes/NotesList'
 import { EditorPanel } from './editor/EditorPanel'
 import { BookmarksList } from './bookmarks/BookmarksList'
 import { BookmarkDetail } from './bookmarks/BookmarkDetail'
+import { ArchivePanel } from './archive/ArchivePanel'
 import { useProjects } from '@/hooks/useProjects'
 import { useNotes } from '@/hooks/useNotes'
 import { useRealtime } from '@/hooks/useRealtime'
 import { useBookmarkCollections } from '@/hooks/useBookmarkCollections'
 import { useBookmarks } from '@/hooks/useBookmarks'
+import { useRecents } from '@/hooks/useRecents'
+import { useVaultItems } from '@/hooks/useVaultItems'
 
 type MobileView = 'sidebar' | 'notes' | 'editor'
 
@@ -22,6 +25,8 @@ export function AppShell() {
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null)
   const [activeBookmarkId, setActiveBookmarkId] = useState<string | null>(null)
   const [mobileView, setMobileView] = useState<MobileView>('sidebar')
+  const [archiveMode, setArchiveMode] = useState(false)
+  const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
 
   const {
     projects,
@@ -39,16 +44,19 @@ export function AppShell() {
     loading: notesLoading,
     createNote,
     updateNote,
-    deleteNote,
+    updateNoteType,
+    archiveNote,
     reorderNotes,
     updateFromRealtime: updateNote_rt,
     insertFromRealtime: insertNote_rt,
     deleteFromRealtime: deleteNote_rt,
-  } = useNotes(activeProjectId)
+  } = useNotes(activeProjectId, activeVaultItemId)
 
   const { collections, createCollection, reorderCollections, updateBookmarkCollection } = useBookmarkCollections()
+  const { recents, recordRecent } = useRecents()
+  const { vaultItems, createVaultItem, updateVaultItem, renameVaultItem, reorderVaultItems } = useVaultItems()
 
-  const { bookmarks, loading: bookmarksLoading, createBookmark, deleteBookmark, reorderBookmarks } =
+  const { bookmarks, loading: bookmarksLoading, createBookmark, archiveBookmark, reorderBookmarks } =
     useBookmarks(activeCollectionId)
 
   useRealtime({
@@ -61,6 +69,7 @@ export function AppShell() {
   })
 
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null
+  const activeVaultItem = vaultItems.find(v => v.id === activeVaultItemId) ?? null
   const activeNote = notes.find(n => n.id === activeNoteId) ?? null
   const activeCollection = collections.find(c => c.id === activeCollectionId) ?? null
   const activeBookmark = bookmarks.find(b => b.id === activeBookmarkId) ?? null
@@ -71,7 +80,10 @@ export function AppShell() {
     setActiveNoteId(null)
     setActiveCollectionId(null)
     setActiveBookmarkId(null)
+    setActiveVaultItemId(null)
+    setArchiveMode(false)
     setMobileView('notes')
+    recordRecent({ id, type: 'project' })
   }
 
   function handleSelectCollection(id: string) {
@@ -79,6 +91,30 @@ export function AppShell() {
     setActiveBookmarkId(null)
     setActiveProjectId(null)
     setActiveNoteId(null)
+    setActiveVaultItemId(null)
+    setArchiveMode(false)
+    setMobileView('notes')
+    recordRecent({ id, type: 'collection' })
+  }
+
+  function handleSelectVaultItem(id: string) {
+    setActiveVaultItemId(id)
+    setActiveNoteId(null)
+    setActiveProjectId(null)
+    setActiveCollectionId(null)
+    setActiveBookmarkId(null)
+    setArchiveMode(false)
+    setMobileView('notes')
+    recordRecent({ id, type: 'vault' })
+  }
+
+  function handleOpenArchive() {
+    setArchiveMode(true)
+    setActiveProjectId(null)
+    setActiveNoteId(null)
+    setActiveCollectionId(null)
+    setActiveBookmarkId(null)
+    setActiveVaultItemId(null)
     setMobileView('notes')
   }
 
@@ -97,33 +133,34 @@ export function AppShell() {
     else if (mobileView === 'notes') setMobileView('sidebar')
   }
 
-  async function handleCreateNote() {
-    const note = await createNote()
+  async function handleCreateNote(type: 'checkbox' | 'note' = 'checkbox') {
+    const note = await createNote(type)
     if (note) {
       setActiveNoteId(note.id)
       setMobileView('editor')
     }
   }
 
-  async function handleDeleteNote(id: string) {
-    await deleteNote(id)
+  async function handleArchiveNote(id: string) {
+    await archiveNote(id)
     setActiveNoteId(null)
     setMobileView('notes')
   }
 
-  async function handleDeleteBookmark(id: string) {
-    await deleteBookmark(id)
+  async function handleArchiveBookmark(id: string) {
+    await archiveBookmark(id)
     setActiveBookmarkId(null)
     setMobileView('notes')
   }
 
   const inBookmarkMode = activeCollectionId !== null
+  const activeNoteContainer = activeProject ?? activeVaultItem
 
   const emptyMessage = inBookmarkMode
     ? 'Select or add a bookmark'
-    : activeProject
+    : activeNoteContainer
     ? 'Pick a note to start reading, or hit + to create a new one'
-    : 'Select a project to get started'
+    : 'Select a project or vault item to get started'
 
   return (
     <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex">
@@ -148,6 +185,16 @@ export function AppShell() {
           onCreateCollection={createCollection}
           onReorderCollections={reorderCollections}
           onUpdateCollection={updateBookmarkCollection}
+          vaultItems={vaultItems}
+          activeVaultItemId={activeVaultItemId}
+          onSelectVaultItem={handleSelectVaultItem}
+          onCreateVaultItem={createVaultItem}
+          onReorderVaultItems={reorderVaultItems}
+          onUpdateVaultItem={updateVaultItem}
+          onRenameVaultItem={renameVaultItem}
+          recents={recents}
+          onOpenArchive={handleOpenArchive}
+          archiveMode={archiveMode}
         />
       </div>
 
@@ -159,7 +206,9 @@ export function AppShell() {
         mobileView === 'editor' ? '-translate-x-full' :
         'translate-x-0',
       )}>
-        {inBookmarkMode ? (
+        {archiveMode ? (
+          <ArchivePanel onClose={() => setArchiveMode(false)} />
+        ) : inBookmarkMode ? (
           <BookmarksList
             collection={activeCollection}
             bookmarks={bookmarks}
@@ -172,13 +221,13 @@ export function AppShell() {
           />
         ) : (
           <NotesList
-            project={activeProject}
+            project={activeNoteContainer}
             notes={notes}
             activeNoteId={activeNoteId}
             loading={notesLoading}
             onSelectNote={handleSelectNote}
-            onCreateNote={handleCreateNote}
-            onDeleteNote={handleDeleteNote}
+            onCreateNote={(type) => handleCreateNote(type)}
+            onArchiveNote={handleArchiveNote}
             onReorderNotes={reorderNotes}
             onMobileBack={handleMobileBack}
           />
@@ -195,7 +244,7 @@ export function AppShell() {
           <BookmarkDetail
             key={activeBookmark.id}
             bookmark={activeBookmark}
-            onDelete={handleDeleteBookmark}
+            onArchive={handleArchiveBookmark}
             onMobileBack={handleMobileBack}
           />
         ) : activeNote ? (
@@ -203,6 +252,7 @@ export function AppShell() {
             key={activeNote.id}
             note={activeNote}
             onUpdate={updateNote}
+            onUpdateNoteType={updateNoteType}
             onMobileBack={handleMobileBack}
           />
         ) : (

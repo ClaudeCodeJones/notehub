@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { ExternalLink, Globe, Trash2, ChevronLeft } from 'lucide-react'
+import { ExternalLink, Globe, Archive, ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Bookmark } from '@/types'
 
 interface BookmarkDetailProps {
   bookmark: Bookmark
-  onDelete: (id: string) => Promise<void>
+  onArchive: (id: string) => Promise<void>
   onMobileBack?: () => void
 }
 
-export function BookmarkDetail({ bookmark, onDelete, onMobileBack }: BookmarkDetailProps) {
+export function BookmarkDetail({ bookmark, onArchive, onMobileBack }: BookmarkDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   const date = new Date(bookmark.created_at).toLocaleDateString('en-US', {
@@ -25,7 +25,7 @@ export function BookmarkDetail({ bookmark, onDelete, onMobileBack }: BookmarkDet
       setConfirmDelete(true)
       return
     }
-    await onDelete(bookmark.id)
+    await onArchive(bookmark.id)
   }
 
   return (
@@ -102,8 +102,8 @@ export function BookmarkDetail({ bookmark, onDelete, onMobileBack }: BookmarkDet
               : 'text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-50'
           )}
         >
-          <Trash2 size={12} />
-          {confirmDelete ? 'Are you sure?' : 'Delete'}
+          <Archive size={12} />
+          {confirmDelete ? 'Are you sure?' : 'Archive'}
         </button>
       </div>
     </div>

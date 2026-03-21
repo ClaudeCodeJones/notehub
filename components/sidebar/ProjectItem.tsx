@@ -122,7 +122,7 @@ export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRena
         onTouchEnd={isEditing ? undefined : handleTouchEnd}
         onTouchMove={isEditing ? undefined : handleTouchEnd}
         className={cn(
-          'flex items-center gap-2 h-10 px-3 rounded-lg select-none transition-colors overflow-hidden',
+          'flex items-center gap-2 h-8 px-3 rounded-lg select-none transition-colors overflow-hidden',
           isEditing ? 'cursor-text' : 'cursor-pointer'
         )}
       >
