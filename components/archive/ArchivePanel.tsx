@@ -14,6 +14,7 @@ interface ArchivePanelProps {
 
 export function ArchivePanel({ onClose }: ArchivePanelProps) {
   const [tab, setTab] = useState<Tab>('notes')
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
   const {
     archivedNotes,
     archivedBookmarks,
@@ -72,6 +73,31 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
           Bookmarks {archivedBookmarks.length > 0 && `(${archivedBookmarks.length})`}
         </button>
       </div>
+
+      {/* Delete all footer */}
+      {((tab === 'notes' && archivedNotes.length > 0) || (tab === 'bookmarks' && archivedBookmarks.length > 0)) && (
+        <div className="px-4 py-2 border-b border-[var(--color-border)] flex justify-end flex-shrink-0">
+          <button
+            onClick={async () => {
+              if (!confirmDeleteAll) { setConfirmDeleteAll(true); return }
+              setConfirmDeleteAll(false)
+              if (tab === 'notes') {
+                await Promise.all(archivedNotes.map(n => permanentDeleteNote(n.id)))
+              } else {
+                await Promise.all(archivedBookmarks.map(b => permanentDeleteBookmark(b.id)))
+              }
+            }}
+            onBlur={() => setTimeout(() => setConfirmDeleteAll(false), 150)}
+            className={cn(
+              'flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded transition-colors',
+              confirmDeleteAll ? 'bg-red-500 text-white' : 'text-[var(--color-text-muted)] hover:text-red-500 hover:bg-[var(--color-bg-tertiary)]'
+            )}
+          >
+            <Trash2 size={12} />
+            {confirmDeleteAll ? 'Sure? Delete all' : 'Delete all'}
+          </button>
+        </div>
+      )}
 
       {/* List */}
       <div className="flex-1 overflow-y-auto min-h-0">

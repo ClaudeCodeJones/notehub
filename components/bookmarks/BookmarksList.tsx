@@ -22,6 +22,7 @@ interface BookmarksListProps {
   onSelectBookmark: (id: string) => void
   onCreateBookmark: (url: string) => Promise<BookmarkType | null>
   onReorderBookmarks: (bookmarks: BookmarkType[]) => void
+  onArchiveBookmark: (id: string) => Promise<void>
   onMobileBack?: () => void
 }
 
@@ -33,6 +34,7 @@ export function BookmarksList({
   onSelectBookmark,
   onCreateBookmark,
   onReorderBookmarks,
+  onArchiveBookmark,
   onMobileBack,
 }: BookmarksListProps) {
   const [isAdding, setIsAdding] = useState(false)
@@ -159,6 +161,7 @@ export function BookmarksList({
                   bookmark={bookmark}
                   isActive={bookmark.id === activeBookmarkId}
                   onSelect={onSelectBookmark}
+                  onArchive={onArchiveBookmark}
                 />
               ))}
             </SortableContext>

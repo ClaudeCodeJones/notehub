@@ -133,7 +133,7 @@ export function AppShell() {
     else if (mobileView === 'notes') setMobileView('sidebar')
   }
 
-  async function handleCreateNote(type: 'checkbox' | 'note' = 'checkbox') {
+  async function handleCreateNote(type: 'checkbox' | 'note' = 'note') {
     const note = await createNote(type)
     if (note) {
       setActiveNoteId(note.id)
@@ -219,6 +219,7 @@ export function AppShell() {
             onSelectBookmark={handleSelectBookmark}
             onCreateBookmark={createBookmark}
             onReorderBookmarks={reorderBookmarks}
+            onArchiveBookmark={handleArchiveBookmark}
             onMobileBack={handleMobileBack}
           />
         ) : (
@@ -254,7 +255,6 @@ export function AppShell() {
             key={activeNote.id}
             note={activeNote}
             onUpdate={updateNote}
-            onUpdateNoteType={updateNoteType}
             onMobileBack={handleMobileBack}
           />
         ) : (

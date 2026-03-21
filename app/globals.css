@@ -106,6 +106,10 @@ body {
 .notehub-editor ul[data-type="taskList"] {
   list-style: none;
   padding-left: 0;
+  margin: 0.25rem 0;
+}
+.notehub-editor ul[data-type="taskList"] > li > div > p {
+  margin: 0;
 }
 .notehub-editor ul[data-type="taskList"] > li {
   display: flex;
@@ -123,15 +127,15 @@ body {
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
-  background-color: #ffffff;
+  background-color: transparent;
   border: 2px solid var(--color-accent);
   border-radius: 4px;
   flex-shrink: 0;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 .notehub-editor ul[data-type="taskList"] > li > label input[type="checkbox"]:checked {
-  background-color: #5a9e52;
-  border-color: #5a9e52;
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.5 7L5.5 10L11.5 4' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
@@ -152,14 +156,27 @@ body {
   height: 0;
 }
 
-/* Note list (file icon per paragraph line) */
-.notehub-note-editor .ProseMirror > p,
-.notehub-note-editor .tiptap > p {
-  padding-left: 22px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8580' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3Cline x1='16' y1='13' x2='8' y2='13'/%3E%3Cline x1='16' y1='17' x2='8' y2='17'/%3E%3Cline x1='10' y1='9' x2='8' y2='9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: left 4px;
-  background-size: 14px 14px;
+/* Note list (file icon per paragraph line — skip empty paragraphs) */
+.notehub-note-editor .ProseMirror > p:not(:has(> br:only-child)),
+.notehub-note-editor .tiptap > p:not(:has(> br:only-child)) {
+  padding-left: 24px;
+  position: relative;
+}
+.notehub-note-editor .ProseMirror > p:not(:has(> br:only-child))::before,
+.notehub-note-editor .tiptap > p:not(:has(> br:only-child))::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 8px;
+  width: 15px;
+  height: 15px;
+  background-color: var(--color-accent);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3Cline x1='16' y1='13' x2='8' y2='13'/%3E%3Cline x1='16' y1='17' x2='8' y2='17'/%3E%3Cline x1='10' y1='9' x2='8' y2='9'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3Cline x1='16' y1='13' x2='8' y2='13'/%3E%3Cline x1='16' y1='17' x2='8' y2='17'/%3E%3Cline x1='10' y1='9' x2='8' y2='9'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100%;
+  mask-size: 100%;
 }
 
 /* Horizontal rule */

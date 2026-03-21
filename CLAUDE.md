@@ -50,9 +50,11 @@ export interface Note {
   project_id: string
   title: string
   content: string
+  note_type: 'checkbox' | 'note'
   sort_order: number
   created_at: string
   updated_at: string
+  archived_at: string | null
 }
 ```
 
@@ -140,3 +142,49 @@ npm run lint      # ESLint check
 - Never use modals — use inline confirmation patterns instead
 - Never add a manual save button — auto-save only
 - Never install new packages without checking if existing ones cover the need first
+
+## SUMMARY ## - 22-03-26
+
+NoteHUB — Project Summary
+What it is
+A personal, single-user note-taking app built with Next.js App Router, Tiptap rich text editor, and Supabase (real-time sync, no auth). Deployed on Vercel.
+
+Architecture
+Layer	Stack
+Frontend	Next.js 14 App Router, TypeScript, Tailwind CSS v4
+Editor	Tiptap (StarterKit + TaskList/TaskItem + Placeholder + TextStyle/Color)
+Data	Supabase (Postgres + real-time subscriptions)
+Icons	lucide-react
+Drag/drop	@dnd-kit
+Three-panel layout (mobile: stacked with slide transitions):
+
+Sidebar — Recent, Vault, Projects, Bookmarks sections
+Middle panel — notes/bookmarks list for selected item
+Editor panel — Tiptap editor with title, type selector, auto-save
+Key decisions made
+Auto-save only — 600ms debounce, no save button ever
+No modals — inline confirmation patterns (e.g. archive "Sure?")
+No auth — intentionally single-user, RLS disabled
+Note types stored as note_type column (checkbox | note) in Supabase with appropriate Tiptap content templates
+Content stored as JSON (editor.getJSON()) not HTML for consistency
+Recents persisted in localStorage, supports projects, collections, and vault items
+Safe area handling — env(safe-area-inset-top) on body, calc(env(safe-area-inset-bottom) + 2rem) on sidebar for PWA/Dynamic Island support
+Apple touch icon configured via Next.js metadata
+What's working
+Full CRUD for notes, projects, bookmark collections, vault items
+Real-time sync across tabs via Supabase channels
+Drag-to-reorder (projects, notes, collections) with optimistic UI
+Checkbox notes — Tiptap TaskList, custom styled checkboxes, Enter creates new item
+Note notes — file icon per line via CSS background-image on p tags
+Archive panel with per-item restore/delete and Delete All per tab
+Recents section (sidebar) tracks projects, collections, vault — with correct icons and active states
+Compact sidebar rows (h-8), inline "View all →" toggles next to section labels
+PWA-ready: apple-touch-icon, viewport-fit=cover, safe area insets
+In progress / known issues
+Note type file icons — CSS background-image approach applied, pending visual confirmation it's rendering correctly
+
+What's next (discussed but not done)
+Third note type: "Text block" — free-form prose, no per-line icon, just plain paragraphs. Type union would become 'checkbox' | 'note' | 'text'
+BookmarksList / middle panel headers — need to match Projects/Vault header style (coloured left edge, same font/size, no icon)
+Bookmark icon in Recent — should use outline variant, not filled
+Dynamic Island — top padding may still need refinement across all panels

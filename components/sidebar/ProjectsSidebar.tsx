@@ -200,8 +200,8 @@ export function ProjectsSidebar({
         {recents.length > 0 && (() => {
           type RecentResolved =
             | (Project & { type: 'project' })
-            | (typeof vaultItems[number] & { type: 'vault' })
-            | (typeof collections[number] & { type: 'collection' })
+            | (VaultItemType & { type: 'vault' })
+            | (BookmarkCollection & { type: 'collection' })
           const resolvedRecents = recents.flatMap((r): RecentResolved[] => {
             if (r.type === 'project') {
               const p = projects.find(x => x.id === r.id)

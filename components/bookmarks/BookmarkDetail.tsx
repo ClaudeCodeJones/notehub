@@ -11,8 +11,17 @@ interface BookmarkDetailProps {
   onMobileBack?: () => void
 }
 
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-fA-F]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#([0-9]+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&apos;/g, "'").replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ')
+}
+
 export function BookmarkDetail({ bookmark, onArchive, onMobileBack }: BookmarkDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const title = bookmark.title ? decodeEntities(bookmark.title) : null
 
   const date = new Date(bookmark.created_at).toLocaleDateString('en-US', {
     month: 'long',
@@ -39,7 +48,7 @@ export function BookmarkDetail({ bookmark, onArchive, onMobileBack }: BookmarkDe
           <ChevronLeft size={20} />
         </button>
         <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
-          {bookmark.title || bookmark.url}
+          {title || bookmark.url}
         </span>
       </div>
 
@@ -52,8 +61,8 @@ export function BookmarkDetail({ bookmark, onArchive, onMobileBack }: BookmarkDe
           rel="noopener noreferrer"
           className="group block mb-6"
         >
-          <h1 className="text-[1.75rem] font-bold leading-tight text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors break-words">
-            {bookmark.title || bookmark.url}
+          <h1 className="text-lg font-semibold leading-snug text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors break-words">
+            {title || bookmark.url}
           </h1>
         </a>
 
