@@ -163,7 +163,7 @@ export function AppShell() {
     : 'Select a project or vault item to get started'
 
   return (
-    <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex">
+    <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
 
       {/* Sidebar panel */}
       <div className={cn(
