@@ -180,7 +180,7 @@ export function ProjectsSidebar({
   return (
     <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full">
       {/* Logo */}
-      <div className="px-4 py-1 border-b border-[var(--color-border)] flex items-center">
+      <div className="px-4 py-1 pt-10 md:pt-1 border-b border-[var(--color-border)] flex items-center">
         <Image
           src="/notehub_logo_v6.png"
           alt="NoteHUB"
