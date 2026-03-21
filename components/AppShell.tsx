@@ -163,14 +163,17 @@ export function AppShell() {
     : 'Select a project or vault item to get started'
 
   return (
-    <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex">
 
       {/* Sidebar panel */}
-      <div className={cn(
-        'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
-        'md:relative md:inset-auto md:translate-x-0',
-        mobileView === 'sidebar' ? 'translate-x-0' : '-translate-x-full',
-      )}>
+      <div
+        className={cn(
+          'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
+          'md:relative md:inset-auto md:translate-x-0',
+          mobileView === 'sidebar' ? 'translate-x-0' : '-translate-x-full',
+        )}
+        style={{ bottom: 'env(safe-area-inset-bottom)' }}
+      >
         <ProjectsSidebar
           projects={projects}
           activeProjectId={activeProjectId}
