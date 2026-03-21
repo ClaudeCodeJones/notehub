@@ -178,7 +178,7 @@ export function ProjectsSidebar({
   }
 
   return (
-    <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full">
+    <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Logo */}
       <div className="px-4 py-1 border-b border-[var(--color-border)] flex items-center">
         <Image

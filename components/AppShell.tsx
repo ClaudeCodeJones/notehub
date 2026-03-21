@@ -172,7 +172,6 @@ export function AppShell() {
           'md:relative md:inset-auto md:translate-x-0',
           mobileView === 'sidebar' ? 'translate-x-0' : '-translate-x-full',
         )}
-        style={{ bottom: 'env(safe-area-inset-bottom)' }}
       >
         <ProjectsSidebar
           projects={projects}
