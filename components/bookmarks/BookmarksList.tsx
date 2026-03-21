@@ -99,8 +99,7 @@ export function BookmarksList({
           >
             <ChevronLeft size={20} />
           </button>
-          <Bookmark size={14} className="flex-shrink-0 text-[var(--color-text-muted)]" />
-          <h2 className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
+          <h2 className="text-lg font-bold text-[var(--color-text-primary)] truncate">
             {collection.name}
           </h2>
         </div>
