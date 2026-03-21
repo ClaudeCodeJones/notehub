@@ -456,7 +456,7 @@ export function ProjectsSidebar({
       </div>
 
       {/* Archive button */}
-      <div className="px-4 py-3 border-t border-[var(--color-border)] flex-shrink-0">
+      <div className="px-4 py-3 border-t border-[var(--color-border)] flex-shrink-0" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
         <button
           onClick={onOpenArchive}
           className={cn(
