@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   description: 'Personal note-taking with real-time sync',
 }
 
+export const viewport = {
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html

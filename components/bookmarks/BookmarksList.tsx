@@ -90,7 +90,8 @@ export function BookmarksList({
   return (
     <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
       {/* Header */}
-      <div className="px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+      <div className="relative px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-sm" style={{ backgroundColor: collection.color }} />
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onMobileBack}
