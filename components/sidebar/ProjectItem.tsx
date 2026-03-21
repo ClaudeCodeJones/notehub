@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ClipboardList } from 'lucide-react'
+import { FolderOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PROJECT_COLORS } from '@/lib/constants'
 import type { Project } from '@/types'
@@ -126,7 +126,7 @@ export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRena
           isEditing ? 'cursor-text' : 'cursor-pointer'
         )}
       >
-        <ClipboardList size={15} className="flex-shrink-0" style={{ color: project.color }} />
+        <FolderOpen size={15} className="flex-shrink-0" style={{ color: project.color }} />
         {isEditing ? (
           <input
             ref={inputRef}

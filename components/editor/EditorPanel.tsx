@@ -30,9 +30,15 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
       StarterKit,
       TaskList,
       TaskItem.configure({ nested: true }),
-      Placeholder.configure({ placeholder: 'Start writing…' }),
+      Placeholder.configure({
+        placeholder: ({ node }) => {
+          if (node.type.name === 'taskItem') return "Press 'Enter' to add list item"
+          return 'Start writing...'
+        },
+        includeChildren: true,
+      }),
     ],
-    content: note.content || '',
+    content: (() => { try { return JSON.parse(note.content) } catch { return note.content || '' } })(),
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()

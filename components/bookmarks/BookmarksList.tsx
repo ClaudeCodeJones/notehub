@@ -90,7 +90,7 @@ export function BookmarksList({
   return (
     <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
       {/* Header */}
-      <div className="px-4 py-3.5 border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+      <div className="px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onMobileBack}

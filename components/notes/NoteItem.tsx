@@ -81,7 +81,7 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onDelete }: N
           !confirmDelete && 'opacity-0 group-hover:opacity-100',
         )}
       >
-        <Trash2 size={11} />
+        <Trash2 size={15} />
         {confirmDelete && 'Sure?'}
       </button>
     </div>

@@ -94,7 +94,7 @@ export function CollectionItem({ collection, isActive, onSelect, onUpdateColor }
         onTouchMove={handleTouchEnd}
         className="flex items-center gap-2 h-10 px-3 rounded-lg cursor-pointer select-none transition-colors overflow-hidden"
       >
-        <Bookmark size={14} className="flex-shrink-0" style={{ color: collection.color, fill: collection.color }} />
+        <Bookmark size={14} className="flex-shrink-0" style={{ color: collection.color }} />
         <span className={cn('text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
           {collection.name}
         </span>

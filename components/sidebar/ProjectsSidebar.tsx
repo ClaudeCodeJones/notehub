@@ -122,13 +122,14 @@ export function ProjectsSidebar({
   return (
     <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full">
       {/* Logo */}
-      <div className="px-4 h-16 border-b border-[var(--color-border)] flex items-center">
+      <div className="px-4 py-1 border-b border-[var(--color-border)] flex items-center">
         <Image
-          src="/notehub_logo_v4.png"
+          src="/notehublogo_colour.png"
           alt="NoteHUB"
-          width={140}
-          height={46}
+          width={280}
+          height={96}
           quality={100}
+          className="h-20 w-auto"
           style={{ objectFit: 'contain' }}
           priority
         />

@@ -60,7 +60,8 @@ export function NotesList({
   return (
     <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[#e8e8e8] h-full">
       {/* Header */}
-      <div className="px-4 h-16 border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+      <div className="relative px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+        <div className="absolute left-0 top-0 bottom-0 w-1 rounded-sm" style={{ backgroundColor: project.color }} />
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onMobileBack}
@@ -68,7 +69,7 @@ export function NotesList({
           >
             <ChevronLeft size={20} />
           </button>
-          <h2 className="text-base font-semibold text-[var(--color-text-primary)] truncate">
+          <h2 className="text-lg font-bold text-[var(--color-text-primary)] truncate">
             {project.name}
           </h2>
         </div>

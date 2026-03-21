@@ -37,7 +37,7 @@ export function useNotes(projectId: string | null) {
     if (!pid) return null
     const { data, error } = await supabase
       .from('notes')
-      .insert({ project_id: pid, title: '', content: '', sort_order: lengthRef.current })
+      .insert({ project_id: pid, title: '', content: '{"type":"doc","content":[{"type":"taskList","content":[{"type":"taskItem","attrs":{"checked":false},"content":[{"type":"paragraph"}]}]}]}', sort_order: lengthRef.current })
       .select()
       .single()
     if (error || !data) return null
