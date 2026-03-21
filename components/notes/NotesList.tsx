@@ -94,7 +94,7 @@ export function NotesList({
       </div>
 
       {/* Notes */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {loading ? (
           <div className="flex items-center justify-center h-16">
             <p className="text-xs text-[var(--color-text-muted)]">Loading…</p>

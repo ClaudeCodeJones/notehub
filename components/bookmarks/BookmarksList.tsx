@@ -113,7 +113,7 @@ export function BookmarksList({
       </div>
 
       {/* Bookmarks */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {isAdding && (
           <div className="px-3 py-3 border-b border-[var(--color-border)]">
             <input
