@@ -1,14 +1,25 @@
 @import "tailwindcss";
 
-html,
-body {
+html {
   overscroll-behavior: none;
   overflow: hidden;
   height: 100%;
 }
 
 body {
+  overscroll-behavior: none;
+  overflow: hidden;
+  /* position: fixed + inset: 0 is the only reliable way to stop iOS rubber-band
+     scrolling content behind the Dynamic Island / notch */
+  position: fixed;
+  inset: 0;
+  width: 100%;
   padding-top: env(safe-area-inset-top);
+}
+
+/* Prevent overscroll bounce in all scrollable children */
+* {
+  overscroll-behavior: none;
 }
 
 @theme inline {

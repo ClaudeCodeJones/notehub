@@ -230,7 +230,7 @@ export function AppShell() {
     : ''
 
   return (
-    <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex">
+    <div className="h-full overflow-hidden bg-[var(--color-bg-primary)] relative md:flex">
 
       {/* Sidebar panel */}
       <div

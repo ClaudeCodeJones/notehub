@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="h-screen overflow-hidden antialiased font-sans">
+      <body className="antialiased font-sans">
         {children}
       </body>
     </html>
