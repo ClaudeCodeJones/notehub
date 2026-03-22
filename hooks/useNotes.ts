@@ -75,6 +75,16 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
     await supabase.from('notes').update({ archived_at: new Date().toISOString() }).eq('id', id)
   }, [])
 
+  const pinNote = useCallback(async (id: string) => {
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, pinned: true } : n))
+    await supabase.from('notes').update({ pinned: true }).eq('id', id)
+  }, [])
+
+  const unpinNote = useCallback(async (id: string) => {
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, pinned: false } : n))
+    await supabase.from('notes').update({ pinned: false }).eq('id', id)
+  }, [])
+
   const reorderNotes = useCallback(async (reordered: Note[]) => {
     setNotes(reordered)
     await Promise.all(
@@ -108,6 +118,8 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
     updateNote,
     updateNoteType,
     archiveNote,
+    pinNote,
+    unpinNote,
     reorderNotes,
     updateFromRealtime,
     insertFromRealtime,

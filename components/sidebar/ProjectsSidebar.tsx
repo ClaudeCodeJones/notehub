@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import Image from 'next/image'
-import { Plus, FolderOpen, Bookmark, Archive, Vault } from 'lucide-react'
+import { Plus, FolderOpen, Bookmark, Archive, Vault, Search } from 'lucide-react'
 import { ProjectItem } from './ProjectItem'
 import { CollectionItem } from './CollectionItem'
 import { VaultItem } from './VaultItem'
@@ -43,6 +43,11 @@ interface ProjectsSidebarProps {
   recents: RecentEntry[]
   onOpenArchive: () => void
   archiveMode: boolean
+  onOpenPhotos: () => void
+  photosMode: boolean
+  onUploadPhoto: (files: FileList) => Promise<void>
+  onOpenSearch: () => void
+  searchMode: boolean
 }
 
 export function ProjectsSidebar({
@@ -69,6 +74,11 @@ export function ProjectsSidebar({
   recents,
   onOpenArchive,
   archiveMode,
+  onOpenPhotos,
+  photosMode,
+  onUploadPhoto,
+  onOpenSearch,
+  searchMode,
 }: ProjectsSidebarProps) {
   const [isCreatingProject, setIsCreatingProject] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
@@ -91,6 +101,7 @@ export function ProjectsSidebar({
   const projectInputRef = useRef<HTMLInputElement>(null)
   const collectionInputRef = useRef<HTMLInputElement>(null)
   const vaultInputRef = useRef<HTMLInputElement>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   const projectSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -452,11 +463,58 @@ export function ProjectsSidebar({
           </div>
         )}
 
+        {/* ── Divider ── */}
+        <div className="my-3 border-t border-[var(--color-border)]" />
+
+        {/* ── Photos ── */}
+        <div className="flex items-center justify-between px-2 mb-1">
+          <button onClick={onOpenPhotos}>
+            <p className={cn(
+              'text-xs font-semibold uppercase tracking-widest bg-[var(--color-bg-tertiary)] rounded px-2 py-0.5',
+              photosMode ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
+            )}>
+              Photos
+            </p>
+          </button>
+          <button
+            onClick={() => photoInputRef.current?.click()}
+            title="Upload photo"
+            className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+          >
+            <Plus size={12} />
+          </button>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={e => {
+              if (e.target.files?.length) {
+                onUploadPhoto(e.target.files)
+                onOpenPhotos()
+                e.target.value = ''
+              }
+            }}
+          />
+        </div>
 
       </div>
 
-      {/* Archive button */}
-      <div className="px-4 py-3 border-t border-[var(--color-border)] flex-shrink-0">
+      {/* Bottom action bar */}
+      <div className="px-4 py-3 border-t border-[var(--color-border)] flex-shrink-0 flex flex-col gap-1">
+        <button
+          onClick={onOpenSearch}
+          className={cn(
+            'w-full flex items-center gap-2 h-9 px-3 rounded-lg text-sm transition-colors select-none',
+            searchMode
+              ? 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] font-semibold'
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
+          )}
+        >
+          <Search size={15} />
+          Search
+        </button>
         <button
           onClick={onOpenArchive}
           className={cn(

@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-import { Plus, FileText, ChevronLeft } from 'lucide-react'
+import { Plus, ChevronLeft } from 'lucide-react'
 import { NoteItem } from './NoteItem'
 import type { Note, Project, VaultItem } from '@/types'
 
@@ -25,6 +25,8 @@ interface NotesListProps {
   onSelectNote: (id: string) => void
   onCreateNote: (type: NoteType) => void
   onArchiveNote: (id: string) => Promise<void>
+  onPinNote: (id: string) => Promise<void>
+  onUnpinNote: (id: string) => Promise<void>
   onReorderNotes: (notes: Note[]) => void
   onMobileBack?: () => void
 }
@@ -37,10 +39,15 @@ export function NotesList({
   onSelectNote,
   onCreateNote,
   onArchiveNote,
+  onPinNote,
+  onUnpinNote,
   onReorderNotes,
   onMobileBack,
 }: NotesListProps) {
   const [lastType, setLastType] = useState<NoteType>('checkbox')
+
+  const pinnedNotes = notes.filter(n => n.pinned)
+  const unpinnedNotes = notes.filter(n => !n.pinned)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -54,17 +61,14 @@ export function NotesList({
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) return
-    const oldIndex = notes.findIndex(n => n.id === active.id)
-    const newIndex = notes.findIndex(n => n.id === over.id)
-    onReorderNotes(arrayMove(notes, oldIndex, newIndex))
+    const oldIndex = unpinnedNotes.findIndex(n => n.id === active.id)
+    const newIndex = unpinnedNotes.findIndex(n => n.id === over.id)
+    onReorderNotes([...pinnedNotes, ...arrayMove(unpinnedNotes, oldIndex, newIndex)])
   }
 
   if (!project) {
     return (
-      <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col items-center justify-center border-r border-[var(--color-border)] bg-[#e8e8e8] h-full gap-2">
-        <FileText size={28} className="text-[var(--color-text-muted)]" style={{ opacity: 0.5 }} />
-        <p className="text-xs text-[var(--color-text-muted)]">Select a project</p>
-      </div>
+      <div className="w-full md:w-[320px] flex-shrink-0 border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full" />
     )
   }
 
@@ -104,30 +108,57 @@ export function NotesList({
             <p className="text-sm text-[var(--color-text-muted)]">No notes yet</p>
           </div>
         ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={notes.map(n => n.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {notes.map(note => (
-                <NoteItem
-                  key={note.id}
-                  note={note}
-                  isActive={note.id === activeNoteId}
-                  projectColor={project.color}
-                  onSelect={onSelectNote}
-                  onArchive={onArchiveNote}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+          <>
+            {/* Pinned section */}
+            {pinnedNotes.length > 0 && (
+              <div>
+                <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">
+                  Pinned
+                </p>
+                {pinnedNotes.map(note => (
+                  <NoteItem
+                    key={note.id}
+                    note={note}
+                    isActive={note.id === activeNoteId}
+                    projectColor={project.color}
+                    onSelect={onSelectNote}
+                    onArchive={onArchiveNote}
+                    onPin={onPinNote}
+                    onUnpin={onUnpinNote}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Unpinned / draggable section */}
+            {unpinnedNotes.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={unpinnedNotes.map(n => n.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {unpinnedNotes.map(note => (
+                    <NoteItem
+                      key={note.id}
+                      note={note}
+                      isActive={note.id === activeNoteId}
+                      projectColor={project.color}
+                      onSelect={onSelectNote}
+                      onArchive={onArchiveNote}
+                      onPin={onPinNote}
+                      onUnpin={onUnpinNote}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            )}
+          </>
         )}
       </div>
-
     </div>
   )
 }

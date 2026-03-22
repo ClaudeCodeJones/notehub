@@ -1,18 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Archive, FileText, Bookmark, RotateCcw, Trash2 } from 'lucide-react'
+import { Archive, FileText, Bookmark, RotateCcw, Trash2, ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useArchivedItems } from '@/hooks/useArchivedItems'
 import type { Note, Bookmark as BookmarkType } from '@/types'
+import type { Photo } from '@/hooks/usePhotos'
 
-type Tab = 'notes' | 'bookmarks'
+type Tab = 'notes' | 'bookmarks' | 'photos'
 
 interface ArchivePanelProps {
   onClose: () => void
+  archivedPhotos: Photo[]
+  onRestorePhoto: (name: string) => Promise<void>
+  onDeletePhoto: (name: string) => Promise<void>
 }
 
-export function ArchivePanel({ onClose }: ArchivePanelProps) {
+export function ArchivePanel({ onClose, archivedPhotos, onRestorePhoto, onDeletePhoto }: ArchivePanelProps) {
   const [tab, setTab] = useState<Tab>('notes')
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
   const {
@@ -29,6 +33,11 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
   useEffect(() => {
     fetchArchived()
   }, [fetchArchived])
+
+  const showDeleteAll =
+    (tab === 'notes' && archivedNotes.length > 0) ||
+    (tab === 'bookmarks' && archivedBookmarks.length > 0) ||
+    (tab === 'photos' && archivedPhotos.length > 0)
 
   return (
     <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
@@ -72,10 +81,22 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
           <Bookmark size={12} />
           Bookmarks {archivedBookmarks.length > 0 && `(${archivedBookmarks.length})`}
         </button>
+        <button
+          onClick={() => setTab('photos')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors',
+            tab === 'photos'
+              ? 'text-[var(--color-text-primary)] border-b-2 border-[var(--color-accent)]'
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
+          )}
+        >
+          <ImageIcon size={12} />
+          Photos {archivedPhotos.length > 0 && `(${archivedPhotos.length})`}
+        </button>
       </div>
 
       {/* Delete all footer */}
-      {((tab === 'notes' && archivedNotes.length > 0) || (tab === 'bookmarks' && archivedBookmarks.length > 0)) && (
+      {showDeleteAll && (
         <div className="px-4 py-2 border-b border-[var(--color-border)] flex justify-end flex-shrink-0">
           <button
             onClick={async () => {
@@ -83,8 +104,10 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
               setConfirmDeleteAll(false)
               if (tab === 'notes') {
                 await Promise.all(archivedNotes.map(n => permanentDeleteNote(n.id)))
-              } else {
+              } else if (tab === 'bookmarks') {
                 await Promise.all(archivedBookmarks.map(b => permanentDeleteBookmark(b.id)))
+              } else {
+                await Promise.all(archivedPhotos.map(p => onDeletePhoto(p.name)))
               }
             }}
             onBlur={() => setTimeout(() => setConfirmDeleteAll(false), 150)}
@@ -101,7 +124,7 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
 
       {/* List */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {loading ? (
+        {loading && tab !== 'photos' ? (
           <div className="flex items-center justify-center h-16">
             <p className="text-xs text-[var(--color-text-muted)]">Loading…</p>
           </div>
@@ -118,7 +141,7 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
               />
             ))
           )
-        ) : (
+        ) : tab === 'bookmarks' ? (
           archivedBookmarks.length === 0 ? (
             <EmptyState label="No archived bookmarks" />
           ) : (
@@ -128,6 +151,19 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
                 bookmark={bookmark}
                 onRestore={restoreBookmark}
                 onDelete={permanentDeleteBookmark}
+              />
+            ))
+          )
+        ) : (
+          archivedPhotos.length === 0 ? (
+            <EmptyState label="No archived photos" />
+          ) : (
+            archivedPhotos.map(photo => (
+              <ArchivedPhotoRow
+                key={photo.name}
+                photo={photo}
+                onRestore={onRestorePhoto}
+                onDelete={onDeletePhoto}
               />
             ))
           )
@@ -228,6 +264,55 @@ function ArchivedBookmarkRow({
           onClick={() => {
             if (!confirmDelete) { setConfirmDelete(true); return }
             onDelete(bookmark.id)
+          }}
+          onBlur={() => setTimeout(() => setConfirmDelete(false), 150)}
+          className={cn(
+            'flex items-center gap-1 text-xs px-1.5 py-1 rounded transition-colors',
+            confirmDelete ? 'bg-red-500 text-white' : 'text-[var(--color-text-muted)] hover:text-red-500 hover:bg-[var(--color-bg-tertiary)]'
+          )}
+        >
+          <Trash2 size={12} />
+          {confirmDelete && 'Sure?'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ArchivedPhotoRow({
+  photo,
+  onRestore,
+  onDelete,
+}: {
+  photo: Photo
+  onRestore: (name: string) => Promise<void>
+  onDelete: (name: string) => Promise<void>
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const date = photo.created_at
+    ? new Date(photo.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : ''
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)]">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={photo.url} alt={photo.name} className="w-9 h-9 rounded object-cover flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{photo.name}</p>
+        <span className="text-xs text-[var(--color-text-muted)]">{date}</span>
+      </div>
+      <div className="flex items-center gap-1 flex-shrink-0">
+        <button
+          onClick={() => onRestore(photo.name)}
+          title="Restore"
+          className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+        >
+          <RotateCcw size={13} />
+        </button>
+        <button
+          onClick={() => {
+            if (!confirmDelete) { setConfirmDelete(true); return }
+            onDelete(photo.name)
           }}
           onBlur={() => setTimeout(() => setConfirmDelete(false), 150)}
           className={cn(

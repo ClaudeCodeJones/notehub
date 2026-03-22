@@ -9,6 +9,7 @@ import { EditorPanel } from './editor/EditorPanel'
 import { BookmarksList } from './bookmarks/BookmarksList'
 import { BookmarkDetail } from './bookmarks/BookmarkDetail'
 import { ArchivePanel } from './archive/ArchivePanel'
+import { SearchPanel } from './search/SearchPanel'
 import { useProjects } from '@/hooks/useProjects'
 import { useNotes } from '@/hooks/useNotes'
 import { useRealtime } from '@/hooks/useRealtime'
@@ -17,6 +18,11 @@ import { useBookmarks } from '@/hooks/useBookmarks'
 import { useRecents } from '@/hooks/useRecents'
 import { useVaultItems } from '@/hooks/useVaultItems'
 import { useSwipeBack } from '@/hooks/useSwipeBack'
+import { useSearch } from '@/hooks/useSearch'
+import { PhotoList } from './photos/PhotoList'
+import { PhotoViewer } from './photos/PhotoViewer'
+import { usePhotos } from '@/hooks/usePhotos'
+import type { NoteResult, BookmarkResult } from '@/hooks/useSearch'
 
 type MobileView = 'sidebar' | 'notes' | 'editor'
 
@@ -27,6 +33,10 @@ export function AppShell() {
   const [activeBookmarkId, setActiveBookmarkId] = useState<string | null>(null)
   const [mobileView, setMobileView] = useState<MobileView>('sidebar')
   const [archiveMode, setArchiveMode] = useState(false)
+  const [photosMode, setPhotosMode] = useState(false)
+  const [searchMode, setSearchMode] = useState(false)
+  const { photos, archivedPhotos, loading: photosLoading, uploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto } = usePhotos()
+  const { query, setQuery, noteResults, bookmarkResults, loading: searchLoading } = useSearch()
   const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
 
   const {
@@ -47,6 +57,8 @@ export function AppShell() {
     updateNote,
     updateNoteType,
     archiveNote,
+    pinNote,
+    unpinNote,
     reorderNotes,
     updateFromRealtime: updateNote_rt,
     insertFromRealtime: insertNote_rt,
@@ -75,7 +87,6 @@ export function AppShell() {
   const activeCollection = collections.find(c => c.id === activeCollectionId) ?? null
   const activeBookmark = bookmarks.find(b => b.id === activeBookmarkId) ?? null
 
-  // Selecting a project clears bookmark mode and vice-versa
   function handleSelectProject(id: string) {
     setActiveProjectId(id)
     setActiveNoteId(null)
@@ -83,6 +94,8 @@ export function AppShell() {
     setActiveBookmarkId(null)
     setActiveVaultItemId(null)
     setArchiveMode(false)
+    setPhotosMode(false)
+    setSearchMode(false)
     setMobileView('notes')
     recordRecent({ id, type: 'project' })
   }
@@ -94,6 +107,8 @@ export function AppShell() {
     setActiveNoteId(null)
     setActiveVaultItemId(null)
     setArchiveMode(false)
+    setPhotosMode(false)
+    setSearchMode(false)
     setMobileView('notes')
     recordRecent({ id, type: 'collection' })
   }
@@ -105,17 +120,34 @@ export function AppShell() {
     setActiveCollectionId(null)
     setActiveBookmarkId(null)
     setArchiveMode(false)
+    setPhotosMode(false)
+    setSearchMode(false)
     setMobileView('notes')
     recordRecent({ id, type: 'vault' })
   }
 
+  function handleOpenPhotos() {
+    setPhotosMode(true)
+    setArchiveMode(false)
+    setSearchMode(false)
+  }
+
   function handleOpenArchive() {
     setArchiveMode(true)
+    setPhotosMode(false)
+    setSearchMode(false)
     setActiveProjectId(null)
     setActiveNoteId(null)
     setActiveCollectionId(null)
     setActiveBookmarkId(null)
     setActiveVaultItemId(null)
+    setMobileView('notes')
+  }
+
+  function handleOpenSearch() {
+    setSearchMode(true)
+    setArchiveMode(false)
+    setPhotosMode(false)
     setMobileView('notes')
   }
 
@@ -127,6 +159,38 @@ export function AppShell() {
   function handleSelectBookmark(id: string) {
     setActiveBookmarkId(id)
     setMobileView('editor')
+  }
+
+  function handleSearchSelectNote(note: NoteResult) {
+    setSearchMode(false)
+    setActiveNoteId(note.id)
+    setActiveBookmarkId(null)
+    setActiveCollectionId(null)
+    setArchiveMode(false)
+    setPhotosMode(false)
+    if (note.project_id) {
+      setActiveProjectId(note.project_id)
+      setActiveVaultItemId(null)
+      recordRecent({ id: note.project_id, type: 'project' })
+    } else if (note.vault_id) {
+      setActiveVaultItemId(note.vault_id)
+      setActiveProjectId(null)
+      recordRecent({ id: note.vault_id, type: 'vault' })
+    }
+    setMobileView('editor')
+  }
+
+  function handleSearchSelectBookmark(bookmark: BookmarkResult) {
+    setSearchMode(false)
+    setActiveBookmarkId(bookmark.id)
+    setActiveCollectionId(bookmark.collection_id)
+    setActiveProjectId(null)
+    setActiveNoteId(null)
+    setActiveVaultItemId(null)
+    setArchiveMode(false)
+    setPhotosMode(false)
+    setMobileView('editor')
+    recordRecent({ id: bookmark.collection_id, type: 'collection' })
   }
 
   function handleMobileBack() {
@@ -163,7 +227,7 @@ export function AppShell() {
     ? 'Select or add a bookmark'
     : activeNoteContainer
     ? 'Pick a note to start reading, or hit + to create a new one'
-    : 'Select a project or vault item to get started'
+    : ''
 
   return (
     <div className="h-screen overflow-hidden bg-[var(--color-bg-primary)] relative md:flex">
@@ -200,10 +264,15 @@ export function AppShell() {
           recents={recents}
           onOpenArchive={handleOpenArchive}
           archiveMode={archiveMode}
+          onOpenPhotos={handleOpenPhotos}
+          photosMode={photosMode}
+          onUploadPhoto={uploadPhoto}
+          onOpenSearch={handleOpenSearch}
+          searchMode={searchMode}
         />
       </div>
 
-      {/* Middle panel: notes or bookmarks */}
+      {/* Middle panel */}
       <div className={cn(
         'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
         'md:relative md:inset-auto md:translate-x-0',
@@ -211,8 +280,33 @@ export function AppShell() {
         mobileView === 'editor' ? '-translate-x-full' :
         'translate-x-0',
       )}>
-        {archiveMode ? (
-          <ArchivePanel onClose={() => setArchiveMode(false)} />
+        {searchMode ? (
+          <SearchPanel
+            query={query}
+            onQueryChange={setQuery}
+            noteResults={noteResults}
+            bookmarkResults={bookmarkResults}
+            loading={searchLoading}
+            onSelectNote={handleSearchSelectNote}
+            onSelectBookmark={handleSearchSelectBookmark}
+          />
+        ) : photosMode ? (
+          <PhotoList
+            photos={photos}
+            loading={photosLoading}
+            uploading={uploading}
+            selectedPhoto={selectedPhoto}
+            onSelectPhoto={setSelectedPhoto}
+            onUpload={uploadPhoto}
+            onArchive={archivePhoto}
+          />
+        ) : archiveMode ? (
+          <ArchivePanel
+            onClose={() => setArchiveMode(false)}
+            archivedPhotos={archivedPhotos}
+            onRestorePhoto={restorePhoto}
+            onDeletePhoto={permanentDeletePhoto}
+          />
         ) : inBookmarkMode ? (
           <BookmarksList
             collection={activeCollection}
@@ -234,19 +328,23 @@ export function AppShell() {
             onSelectNote={handleSelectNote}
             onCreateNote={(type) => handleCreateNote(type)}
             onArchiveNote={handleArchiveNote}
+            onPinNote={pinNote}
+            onUnpinNote={unpinNote}
             onReorderNotes={reorderNotes}
             onMobileBack={handleMobileBack}
           />
         )}
       </div>
 
-      {/* Right panel: editor, bookmark detail, or empty state */}
+      {/* Right panel */}
       <div className={cn(
         'absolute inset-0 h-full flex flex-col transition-transform duration-300 ease-in-out',
         'md:relative md:inset-auto md:flex-1 md:translate-x-0',
-        mobileView === 'editor' ? 'translate-x-0' : 'translate-x-full',
+        photosMode ? 'translate-x-0' : mobileView === 'editor' ? 'translate-x-0' : 'translate-x-full',
       )}>
-        {activeBookmark ? (
+        {photosMode ? (
+          <PhotoViewer photo={selectedPhoto} />
+        ) : activeBookmark ? (
           <BookmarkDetail
             key={activeBookmark.id}
             bookmark={activeBookmark}
@@ -262,8 +360,12 @@ export function AppShell() {
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-bg-primary)] select-none px-6 text-center">
-            <FileText size={48} className="mb-4 text-[var(--color-accent)]" style={{ opacity: 0.5 }} />
-            <p className="text-sm text-[var(--color-text-muted)]">{emptyMessage}</p>
+            {emptyMessage && (
+              <>
+                <FileText size={48} className="mb-4 text-[var(--color-accent)]" style={{ opacity: 0.5 }} />
+                <p className="text-sm text-[var(--color-text-muted)]">{emptyMessage}</p>
+              </>
+            )}
           </div>
         )}
       </div>

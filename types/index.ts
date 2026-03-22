@@ -14,6 +14,7 @@ export interface Note {
   content: string
   note_type: 'checkbox' | 'note'
   sort_order: number
+  pinned: boolean
   created_at: string
   updated_at: string
   archived_at: string | null

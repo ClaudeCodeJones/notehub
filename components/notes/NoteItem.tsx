@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Archive } from 'lucide-react'
+import { Archive, Pin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
 
@@ -13,9 +13,11 @@ interface NoteItemProps {
   projectColor: string
   onSelect: (id: string) => void
   onArchive: (id: string) => Promise<void>
+  onPin: (id: string) => Promise<void>
+  onUnpin: (id: string) => Promise<void>
 }
 
-export function NoteItem({ note, isActive, projectColor, onSelect, onArchive }: NoteItemProps) {
+export function NoteItem({ note, isActive, projectColor, onSelect, onArchive, onPin, onUnpin }: NoteItemProps) {
   const [isHovered, setIsHovered] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: note.id,
@@ -38,9 +40,14 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onArchive }: 
     day: 'numeric',
   })
 
-  function handleDelete(e: React.MouseEvent) {
+  function handleArchive(e: React.MouseEvent) {
     e.stopPropagation()
     onArchive(note.id)
+  }
+
+  function handlePin(e: React.MouseEvent) {
+    e.stopPropagation()
+    note.pinned ? onUnpin(note.id) : onPin(note.id)
   }
 
   return (
@@ -64,13 +71,28 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onArchive }: 
         <span className="text-xs text-[var(--color-text-muted)]">{date}</span>
       </div>
 
-      <button
-        onClick={handleDelete}
-        onPointerDown={e => e.stopPropagation()}
-        className="flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 text-[var(--color-text-muted)] hover:text-red-500"
-      >
-        <Archive size={15} />
-      </button>
+      <div className="flex items-center gap-0.5 flex-shrink-0">
+        <button
+          onClick={handlePin}
+          onPointerDown={e => e.stopPropagation()}
+          title={note.pinned ? 'Unpin' : 'Pin'}
+          className={cn(
+            'p-1 rounded transition-colors',
+            note.pinned
+              ? 'opacity-100 text-[var(--color-accent)]'
+              : 'opacity-0 group-hover:opacity-100 text-[var(--color-text-muted)] hover:text-[var(--color-accent)]'
+          )}
+        >
+          <Pin size={13} className={note.pinned ? 'fill-current' : ''} />
+        </button>
+        <button
+          onClick={handleArchive}
+          onPointerDown={e => e.stopPropagation()}
+          className="flex items-center gap-1 text-xs px-1 py-1 rounded transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 text-[var(--color-text-muted)] hover:text-red-500"
+        >
+          <Archive size={13} />
+        </button>
+      </div>
     </div>
   )
 }
