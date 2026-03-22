@@ -39,7 +39,7 @@ function NavCard({ icon: Icon, label, sub, count, onClick, disabled, tint }: Nav
     <div
       onClick={disabled ? undefined : onClick}
       className={cn(
-        'relative rounded-2xl bg-[var(--color-bg-secondary)] overflow-hidden shadow-sm transition-all duration-150 min-h-[160px]',
+        'relative rounded-2xl bg-[var(--color-bg-secondary)] overflow-hidden shadow-sm transition-all duration-150 min-h-[320px]',
         disabled
           ? 'opacity-40 cursor-default'
           : 'cursor-pointer hover:scale-[1.02] hover:shadow-md'
@@ -80,7 +80,7 @@ function RecentCard({ item, onClick }: { item: ResolvedRecent; onClick: () => vo
   return (
     <div
       onClick={onClick}
-      className="flex-shrink-0 w-40 snap-start rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 cursor-pointer shadow-sm hover:shadow hover:-translate-y-px transition-all duration-150 flex flex-col gap-2"
+      className="flex-1 min-w-0 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 cursor-pointer shadow-sm hover:shadow hover:-translate-y-px transition-all duration-150 flex flex-col gap-2"
     >
       <div
         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -89,7 +89,7 @@ function RecentCard({ item, onClick }: { item: ResolvedRecent; onClick: () => vo
         <Icon size={15} style={{ color: item.color }} />
       </div>
       <p className="text-sm font-medium text-[var(--color-text-primary)] truncate leading-snug">{item.name}</p>
-      <p className="text-[11px] text-[var(--color-text-secondary)] capitalize">{item.type}</p>
+      <p className="text-[11px] text-[var(--color-text-secondary)] capitalize">{item.type === 'collection' ? 'Bookmark' : item.type}</p>
     </div>
   )
 }
@@ -128,21 +128,21 @@ function FAB({ onCreateProject, onCreateCollection, onCreateVaultItem }: {
   function handle(fn: () => void) { setOpen(false); fn() }
 
   return (
-    <div ref={ref} className="fixed bottom-6 right-6 flex flex-col items-end gap-2 z-40">
+    <div ref={ref} className="relative flex items-center">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
+        title="Create new"
+      >
+        <Plus size={18} className={cn('transition-transform duration-200', open && 'rotate-45')} />
+      </button>
       {open && (
-        <div className="flex flex-col gap-0.5 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl shadow-lg p-2 w-48">
+        <div className="absolute top-full right-0 mt-2 flex flex-col gap-0.5 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl shadow-lg p-2 w-48 z-40">
           <FABRow icon={FolderPlus} label="New Project" onClick={() => handle(onCreateProject)} />
           <FABRow icon={BookmarkPlus} label="New Collection" onClick={() => handle(onCreateCollection)} />
           <FABRow icon={Vault} label="Add to Vault" onClick={() => handle(onCreateVaultItem)} />
         </div>
       )}
-      <button
-        onClick={() => setOpen(v => !v)}
-        className="w-12 h-12 rounded-full bg-[var(--color-accent)] text-white shadow-lg flex items-center justify-center hover:bg-[var(--color-accent-hover)] transition-colors duration-150"
-        title="Create new"
-      >
-        <Plus size={20} className={cn('transition-transform duration-200', open && 'rotate-45')} />
-      </button>
     </div>
   )
 }
@@ -200,25 +200,32 @@ export function HomePanel({
   return (
     <div className="flex-1 flex flex-col bg-[var(--color-bg-primary)] h-full overflow-hidden">
 
-      {/* Header — slim branded bar, content aligned to card grid */}
-      <div className="h-16 flex items-center flex-shrink-0 bg-[var(--color-accent)] shadow-sm">
+      {/* Header */}
+      <div className="h-24 flex items-center flex-shrink-0 bg-[var(--color-accent)] shadow-sm">
         <div className="max-w-4xl mx-auto px-6 w-full flex items-center justify-between">
           <Image
             src="/notehub_logo_white.png"
             alt="NoteHUB"
-            width={200}
-            height={68}
+            width={260}
+            height={88}
             quality={100}
-            className="h-9 w-auto"
+            className="h-12 w-auto"
             priority
           />
-          <button
-            onClick={onOpenSearch}
-            title="Search"
-            className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
-          >
-            <Search size={18} />
-          </button>
+          <div className="flex items-center gap-1">
+            <FAB
+              onCreateProject={onCreateProject}
+              onCreateCollection={onCreateCollection}
+              onCreateVaultItem={onCreateVaultItem}
+            />
+            <button
+              onClick={onOpenSearch}
+              title="Search"
+              className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
+            >
+              <Search size={18} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -270,7 +277,7 @@ export function HomePanel({
           {resolvedRecents.length > 0 && (
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] mb-3">Recent</h2>
-              <div className="flex gap-4 overflow-x-auto snap-x pb-2 -mx-6 px-6">
+              <div className="flex gap-3">
                 {resolvedRecents.map(item => (
                   <RecentCard key={item.id} item={item} onClick={() => handleItemClick(item)} />
                 ))}
@@ -281,13 +288,6 @@ export function HomePanel({
 
         </div>
       </div>
-
-      {/* FAB */}
-      <FAB
-        onCreateProject={onCreateProject}
-        onCreateCollection={onCreateCollection}
-        onCreateVaultItem={onCreateVaultItem}
-      />
 
     </div>
   )

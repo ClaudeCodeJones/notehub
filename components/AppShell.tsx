@@ -37,7 +37,7 @@ export function AppShell() {
   const [photosMode, setPhotosMode] = useState(false)
   const [searchMode, setSearchMode] = useState(false)
   const [homeMode, setHomeMode] = useState(true)
-  const { photos, archivedPhotos, loading: photosLoading, uploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto } = usePhotos()
+  const { photos, archivedPhotos, loading: photosLoading, uploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto, deletePhoto } = usePhotos()
   const { query, setQuery, noteResults, bookmarkResults, loading: searchLoading } = useSearch()
   const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
 
@@ -354,6 +354,7 @@ export function AppShell() {
             onSelectPhoto={setSelectedPhoto}
             onUpload={uploadPhoto}
             onArchive={archivePhoto}
+            onDelete={deletePhoto}
           />
         ) : archiveMode ? (
           <ArchivePanel

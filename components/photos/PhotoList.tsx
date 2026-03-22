@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
-import { ImageIcon, ImagePlus, Archive } from 'lucide-react'
+import { ImageIcon, ImagePlus, Archive, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Photo } from '@/hooks/usePhotos'
 import { PHOTOS_LIMIT } from '@/hooks/usePhotos'
@@ -14,6 +14,7 @@ interface PhotoListProps {
   onSelectPhoto: (photo: Photo) => void
   onUpload: (files: FileList) => Promise<void>
   onArchive: (name: string) => Promise<void>
+  onDelete: (name: string) => Promise<void>
 }
 
 function formatDate(iso: string) {
@@ -21,7 +22,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectPhoto, onUpload, onArchive }: PhotoListProps) {
+export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectPhoto, onUpload, onArchive, onDelete }: PhotoListProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const atLimit = photos.length >= PHOTOS_LIMIT
 
@@ -112,14 +113,23 @@ export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectP
                       {formatDate(photo.created_at)}
                     </p>
                   </div>
-                  {/* Delete */}
-                  <button
-                    onClick={e => { e.stopPropagation(); onArchive(photo.name) }}
-                    title="Archive"
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all flex-shrink-0"
-                  >
-                    <Archive size={14} />
-                  </button>
+                  {/* Actions */}
+                  <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 flex-shrink-0 transition-all">
+                    <button
+                      onClick={e => { e.stopPropagation(); onArchive(photo.name) }}
+                      title="Archive"
+                      className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+                    >
+                      <Archive size={14} />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); onDelete(photo.name) }}
+                      title="Permanently delete"
+                      className="p-1 rounded text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               )
             })}
