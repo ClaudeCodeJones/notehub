@@ -80,7 +80,7 @@ function RecentCard({ item, onClick }: { item: ResolvedRecent; onClick: () => vo
   return (
     <div
       onClick={onClick}
-      className="flex-shrink-0 w-36 md:flex-1 md:w-auto rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 cursor-pointer shadow-sm hover:shadow hover:-translate-y-px transition-all duration-150 flex flex-col gap-2"
+      className="min-w-0 md:flex-1 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 cursor-pointer shadow-sm hover:shadow hover:-translate-y-px transition-all duration-150 flex flex-col gap-2"
     >
       <div
         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -277,8 +277,8 @@ export function HomePanel({
           {resolvedRecents.length > 0 && (
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] mb-3">Recent</h2>
-              <div className="flex gap-3 overflow-x-auto -mx-6 px-6 pb-1">
-                {resolvedRecents.map(item => (
+              <div className="grid grid-cols-2 gap-3 md:flex md:flex-row">
+                {resolvedRecents.slice(0, 4).map(item => (
                   <RecentCard key={item.id} item={item} onClick={() => handleItemClick(item)} />
                 ))}
               </div>

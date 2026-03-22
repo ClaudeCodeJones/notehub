@@ -274,7 +274,7 @@ export function AppShell() {
           'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
           'md:relative md:inset-auto md:translate-x-0',
           homeMode && 'md:hidden',
-          mobileView === 'sidebar' ? 'translate-x-0' : '-translate-x-full',
+          homeMode ? '-translate-x-full' : mobileView === 'sidebar' ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <ProjectsSidebar
@@ -316,6 +316,7 @@ export function AppShell() {
         'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
         'md:relative md:inset-auto md:translate-x-0',
         homeMode && 'md:flex-1',
+        homeMode ? 'translate-x-0' :
         mobileView === 'sidebar' ? 'translate-x-full' :
         mobileView === 'editor' ? '-translate-x-full' :
         'translate-x-0',
