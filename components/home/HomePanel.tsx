@@ -39,7 +39,7 @@ function NavCard({ icon: Icon, label, sub, count, onClick, disabled, tint }: Nav
     <div
       onClick={disabled ? undefined : onClick}
       className={cn(
-        'relative rounded-2xl bg-[var(--color-bg-secondary)] overflow-hidden shadow-sm transition-all duration-150 min-h-[320px]',
+        'relative rounded-2xl bg-[var(--color-bg-secondary)] overflow-hidden shadow-sm transition-all duration-150 min-h-[160px] md:min-h-[320px]',
         disabled
           ? 'opacity-40 cursor-default'
           : 'cursor-pointer hover:scale-[1.02] hover:shadow-md'
@@ -80,7 +80,7 @@ function RecentCard({ item, onClick }: { item: ResolvedRecent; onClick: () => vo
   return (
     <div
       onClick={onClick}
-      className="flex-1 min-w-0 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 cursor-pointer shadow-sm hover:shadow hover:-translate-y-px transition-all duration-150 flex flex-col gap-2"
+      className="flex-shrink-0 w-36 md:flex-1 md:w-auto rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-3 cursor-pointer shadow-sm hover:shadow hover:-translate-y-px transition-all duration-150 flex flex-col gap-2"
     >
       <div
         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -230,7 +230,7 @@ export function HomePanel({
       </div>
 
       {/* Scrollable body — max-width centred to reduce empty space on wide screens */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 pt-6 pb-6 flex flex-col gap-5">
 
           {/* Tool tiles */}
@@ -277,7 +277,7 @@ export function HomePanel({
           {resolvedRecents.length > 0 && (
             <section>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] mb-3">Recent</h2>
-              <div className="flex gap-3">
+              <div className="flex gap-3 overflow-x-auto -mx-6 px-6 pb-1">
                 {resolvedRecents.map(item => (
                   <RecentCard key={item.id} item={item} onClick={() => handleItemClick(item)} />
                 ))}
