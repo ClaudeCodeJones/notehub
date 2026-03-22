@@ -178,7 +178,7 @@ export function HomePanel({
   onCreateCollection,
   onCreateVaultItem,
 }: HomePanelProps) {
-  const resolvedRecents: ResolvedRecent[] = recents.flatMap(r => {
+  const resolvedRecents: ResolvedRecent[] = recents.flatMap((r): ResolvedRecent[] => {
     if (r.type === 'project') {
       const p = projects.find(x => x.id === r.id)
       return p ? [{ ...p, type: 'project' as const }] : []
