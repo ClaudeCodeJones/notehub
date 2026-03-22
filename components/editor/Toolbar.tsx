@@ -64,7 +64,7 @@ function ColorPicker({ editor }: { editor: Editor }) {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg shadow-lg p-2 grid grid-cols-4 gap-1">
+        <div className="absolute top-full right-0 mt-1 z-50 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg shadow-lg p-2 flex flex-wrap gap-1.5 w-[130px]">
           {/* Reset to default */}
           <button
             onClick={() => { editor.chain().focus().unsetColor().run(); setOpen(false) }}

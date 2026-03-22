@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import Image from 'next/image'
-import { Plus, FolderOpen, Bookmark, Archive, Vault, Search } from 'lucide-react'
+import { Plus, FolderOpen, Bookmark, Archive, Vault, Search, House } from 'lucide-react'
 import { ProjectItem } from './ProjectItem'
 import { CollectionItem } from './CollectionItem'
 import { VaultItem } from './VaultItem'
@@ -48,6 +48,8 @@ interface ProjectsSidebarProps {
   onUploadPhoto: (files: FileList) => Promise<void>
   onOpenSearch: () => void
   searchMode: boolean
+  onOpenHome: () => void
+  homeMode: boolean
 }
 
 export function ProjectsSidebar({
@@ -79,6 +81,8 @@ export function ProjectsSidebar({
   onUploadPhoto,
   onOpenSearch,
   searchMode,
+  onOpenHome,
+  homeMode,
 }: ProjectsSidebarProps) {
   const [isCreatingProject, setIsCreatingProject] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
@@ -190,22 +194,38 @@ export function ProjectsSidebar({
 
   return (
     <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2rem)' }}>
-      {/* Logo */}
+      {/* Logo — click to return to Home */}
       <div className="px-4 py-1 border-b border-[var(--color-border)] flex items-center">
-        <Image
-          src="/notehub_logo_v6.png"
-          alt="NoteHUB"
-          width={280}
-          height={96}
-          quality={100}
-          className="h-20 w-auto"
-          style={{ objectFit: 'contain' }}
-          priority
-        />
+        <button onClick={onOpenHome} className="cursor-pointer focus:outline-none">
+          <Image
+            src="/notehub_logo_v6.png"
+            alt="NoteHUB"
+            width={280}
+            height={96}
+            quality={100}
+            className="h-20 w-auto"
+            style={{ objectFit: 'contain' }}
+            priority
+          />
+        </button>
       </div>
 
       {/* Scrollable content: projects + bookmarks */}
       <div className="flex-1 overflow-y-auto p-2 pb-4 min-h-0">
+
+        {/* ── Home ── */}
+        <button
+          onClick={onOpenHome}
+          className={cn(
+            'flex items-center gap-2 h-8 w-full px-3 rounded-lg text-sm select-none transition-colors mb-1',
+            homeMode
+              ? 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] font-semibold'
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
+          )}
+        >
+          <House size={15} />
+          Home
+        </button>
 
         {/* ── Recent ── */}
         {recents.length > 0 && (() => {
@@ -234,7 +254,7 @@ export function ProjectsSidebar({
                 </p>
               </div>
               <div className="px-2 flex flex-col gap-1 mb-1">
-                {resolvedRecents.map(item => {
+                {resolvedRecents.slice(0, 3).map(item => {
                   const isActive = item.type === 'project'
                     ? item.id === activeProjectId
                     : item.type === 'vault'

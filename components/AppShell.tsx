@@ -10,6 +10,7 @@ import { BookmarksList } from './bookmarks/BookmarksList'
 import { BookmarkDetail } from './bookmarks/BookmarkDetail'
 import { ArchivePanel } from './archive/ArchivePanel'
 import { SearchPanel } from './search/SearchPanel'
+import { HomePanel } from './home/HomePanel'
 import { useProjects } from '@/hooks/useProjects'
 import { useNotes } from '@/hooks/useNotes'
 import { useRealtime } from '@/hooks/useRealtime'
@@ -35,6 +36,7 @@ export function AppShell() {
   const [archiveMode, setArchiveMode] = useState(false)
   const [photosMode, setPhotosMode] = useState(false)
   const [searchMode, setSearchMode] = useState(false)
+  const [homeMode, setHomeMode] = useState(true)
   const { photos, archivedPhotos, loading: photosLoading, uploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto } = usePhotos()
   const { query, setQuery, noteResults, bookmarkResults, loading: searchLoading } = useSearch()
   const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
@@ -96,6 +98,7 @@ export function AppShell() {
     setArchiveMode(false)
     setPhotosMode(false)
     setSearchMode(false)
+    setHomeMode(false)
     setMobileView('notes')
     recordRecent({ id, type: 'project' })
   }
@@ -109,6 +112,7 @@ export function AppShell() {
     setArchiveMode(false)
     setPhotosMode(false)
     setSearchMode(false)
+    setHomeMode(false)
     setMobileView('notes')
     recordRecent({ id, type: 'collection' })
   }
@@ -122,6 +126,7 @@ export function AppShell() {
     setArchiveMode(false)
     setPhotosMode(false)
     setSearchMode(false)
+    setHomeMode(false)
     setMobileView('notes')
     recordRecent({ id, type: 'vault' })
   }
@@ -130,12 +135,14 @@ export function AppShell() {
     setPhotosMode(true)
     setArchiveMode(false)
     setSearchMode(false)
+    setHomeMode(false)
   }
 
   function handleOpenArchive() {
     setArchiveMode(true)
     setPhotosMode(false)
     setSearchMode(false)
+    setHomeMode(false)
     setActiveProjectId(null)
     setActiveNoteId(null)
     setActiveCollectionId(null)
@@ -148,6 +155,20 @@ export function AppShell() {
     setSearchMode(true)
     setArchiveMode(false)
     setPhotosMode(false)
+    setHomeMode(false)
+    setMobileView('notes')
+  }
+
+  function handleOpenHome() {
+    setHomeMode(true)
+    setSearchMode(false)
+    setArchiveMode(false)
+    setPhotosMode(false)
+    setActiveProjectId(null)
+    setActiveNoteId(null)
+    setActiveCollectionId(null)
+    setActiveBookmarkId(null)
+    setActiveVaultItemId(null)
     setMobileView('notes')
   }
 
@@ -200,6 +221,21 @@ export function AppShell() {
 
   useSwipeBack(handleMobileBack, mobileView !== 'sidebar')
 
+  async function handleFabCreateProject() {
+    const project = await createProject('New Project')
+    if (project) handleSelectProject(project.id)
+  }
+
+  async function handleFabCreateCollection() {
+    const collection = await createCollection('New Collection')
+    if (collection) handleSelectCollection(collection.id)
+  }
+
+  async function handleFabCreateVaultItem() {
+    const item = await createVaultItem('New Vault Item')
+    if (item) handleSelectVaultItem(item.id)
+  }
+
   async function handleCreateNote(type: 'checkbox' | 'note' = 'note') {
     const note = await createNote(type)
     if (note) {
@@ -237,6 +273,7 @@ export function AppShell() {
         className={cn(
           'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
           'md:relative md:inset-auto md:translate-x-0',
+          homeMode && 'md:hidden',
           mobileView === 'sidebar' ? 'translate-x-0' : '-translate-x-full',
         )}
       >
@@ -269,6 +306,8 @@ export function AppShell() {
           onUploadPhoto={uploadPhoto}
           onOpenSearch={handleOpenSearch}
           searchMode={searchMode}
+          onOpenHome={handleOpenHome}
+          homeMode={homeMode}
         />
       </div>
 
@@ -276,11 +315,27 @@ export function AppShell() {
       <div className={cn(
         'absolute inset-0 h-full transition-transform duration-300 ease-in-out',
         'md:relative md:inset-auto md:translate-x-0',
+        homeMode && 'md:flex-1',
         mobileView === 'sidebar' ? 'translate-x-full' :
         mobileView === 'editor' ? '-translate-x-full' :
         'translate-x-0',
       )}>
-        {searchMode ? (
+        {homeMode ? (
+          <HomePanel
+            projects={projects}
+            vaultItems={vaultItems}
+            collections={collections}
+            recents={recents}
+            onSelectProject={handleSelectProject}
+            onSelectCollection={handleSelectCollection}
+            onSelectVaultItem={handleSelectVaultItem}
+            onOpenPhotos={handleOpenPhotos}
+            onOpenSearch={handleOpenSearch}
+            onCreateProject={handleFabCreateProject}
+            onCreateCollection={handleFabCreateCollection}
+            onCreateVaultItem={handleFabCreateVaultItem}
+          />
+        ) : searchMode ? (
           <SearchPanel
             query={query}
             onQueryChange={setQuery}
@@ -340,6 +395,7 @@ export function AppShell() {
       <div className={cn(
         'absolute inset-0 h-full flex flex-col transition-transform duration-300 ease-in-out',
         'md:relative md:inset-auto md:flex-1 md:translate-x-0',
+        homeMode && 'md:hidden',
         photosMode ? 'translate-x-0' : mobileView === 'editor' ? 'translate-x-0' : 'translate-x-full',
       )}>
         {photosMode ? (
