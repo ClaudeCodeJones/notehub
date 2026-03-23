@@ -5,6 +5,7 @@ export interface Project {
   sort_order: number
   created_at: string
   updated_at: string
+  archived_at: string | null
 }
 
 export interface Note {

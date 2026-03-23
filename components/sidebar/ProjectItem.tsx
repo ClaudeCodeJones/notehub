@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { FolderOpen } from 'lucide-react'
+import { FolderOpen, ArchiveIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PROJECT_COLORS } from '@/lib/constants'
 import type { Project } from '@/types'
@@ -15,9 +15,10 @@ interface ProjectItemProps {
   onSelect: (id: string) => void
   onUpdateColor: (color: string) => void
   onRename: (name: string) => void
+  onArchive: () => void
 }
 
-export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRename }: ProjectItemProps) {
+export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRename, onArchive }: ProjectItemProps) {
   const [mounted, setMounted] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [showPicker, setShowPicker] = useState(false)
@@ -139,9 +140,20 @@ export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRena
             className="w-full text-sm bg-transparent outline-none border-none text-[var(--color-text-primary)]"
           />
         ) : (
-          <span className={cn('text-base md:text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
-            {project.name || 'Untitled project'}
-          </span>
+          <>
+            <span className={cn('text-base md:text-sm truncate text-[var(--color-text-primary)] flex-1', isActive && 'font-semibold')}>
+              {project.name || 'Untitled project'}
+            </span>
+            {isHovered && (
+              <button
+                onClick={e => { e.stopPropagation(); onArchive() }}
+                onPointerDown={e => e.stopPropagation()}
+                className="flex-shrink-0 p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+              >
+                <ArchiveIcon size={12} />
+              </button>
+            )}
+          </>
         )}
       </div>
 

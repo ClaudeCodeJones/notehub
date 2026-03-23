@@ -46,6 +46,7 @@ export function AppShell() {
     createProject,
     updateProject,
     renameProject,
+    archiveProject: archiveProjectMutation,
     reorderProjects,
     updateFromRealtime: updateProjectRealtime,
     insertFromRealtime: insertProject,
@@ -285,6 +286,7 @@ export function AppShell() {
           onReorderProjects={reorderProjects}
           onUpdateProject={updateProject}
           onRenameProject={renameProject}
+          onArchiveProject={archiveProjectMutation}
           collections={collections}
           activeCollectionId={activeCollectionId}
           onSelectCollection={handleSelectCollection}

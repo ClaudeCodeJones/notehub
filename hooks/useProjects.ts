@@ -18,6 +18,7 @@ export function useProjects() {
     supabase
       .from('projects')
       .select('*')
+      .is('archived_at', null)
       .order('sort_order', { ascending: true })
       .then(({ data, error }) => {
         if (error) setError(error.message)
@@ -61,6 +62,11 @@ export function useProjects() {
     await supabase.from('projects').update({ name }).eq('id', id)
   }, [])
 
+  const archiveProject = useCallback(async (id: string) => {
+    setProjects(prev => prev.filter(p => p.id !== id))
+    await supabase.from('projects').update({ archived_at: new Date().toISOString() }).eq('id', id)
+  }, [])
+
   const updateFromRealtime = useCallback((updated: Project) => {
     setProjects(prev => prev.map(p => (p.id === updated.id ? updated : p)))
   }, [])
@@ -83,6 +89,7 @@ export function useProjects() {
     createProject,
     updateProject,
     renameProject,
+    archiveProject,
     reorderProjects,
     updateFromRealtime,
     insertFromRealtime,

@@ -27,6 +27,7 @@ interface ProjectsSidebarProps {
   onReorderProjects: (projects: Project[]) => void
   onUpdateProject: (id: string, color: string) => void
   onRenameProject: (id: string, name: string) => void
+  onArchiveProject: (id: string) => void
   collections: BookmarkCollection[]
   activeCollectionId: string | null
   onSelectCollection: (id: string) => void
@@ -60,6 +61,7 @@ export function ProjectsSidebar({
   onReorderProjects,
   onUpdateProject,
   onRenameProject,
+  onArchiveProject,
   collections,
   activeCollectionId,
   onSelectCollection,
@@ -396,6 +398,7 @@ export function ProjectsSidebar({
                   onSelect={onSelectProject}
                   onUpdateColor={(color) => onUpdateProject(project.id, color)}
                   onRename={(name) => onRenameProject(project.id, name)}
+                  onArchive={() => onArchiveProject(project.id)}
                 />
               ))}
             </SortableContext>
