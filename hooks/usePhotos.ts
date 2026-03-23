@@ -46,6 +46,12 @@ export function usePhotos() {
 
   useEffect(() => { loadPhotos() }, [loadPhotos])
 
+  useEffect(() => {
+    function handleFocus() { loadPhotos() }
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [loadPhotos])
+
   const uploadPhoto = useCallback(async (files: FileList) => {
     if (photos.length >= PHOTOS_LIMIT) return
     setUploading(true)
@@ -66,7 +72,8 @@ export function usePhotos() {
   }, [loadPhotos, photos.length])
 
   const archivePhoto = useCallback(async (name: string) => {
-    await supabase.storage.from('photos').move(name, `archived/${name}`)
+    const { error } = await supabase.storage.from('photos').move(name, `archived/${name}`)
+    if (error) { console.error('Failed to archive photo:', error); return }
     setPhotos(prev => {
       const photo = prev.find(p => p.name === name)
       if (photo) {
@@ -82,7 +89,8 @@ export function usePhotos() {
   }, [])
 
   const restorePhoto = useCallback(async (name: string) => {
-    await supabase.storage.from('photos').move(`archived/${name}`, name)
+    const { error } = await supabase.storage.from('photos').move(`archived/${name}`, name)
+    if (error) { console.error('Failed to restore photo:', error); return }
     setArchivedPhotos(prev => {
       const photo = prev.find(p => p.name === name)
       if (photo) {
@@ -97,12 +105,14 @@ export function usePhotos() {
   }, [])
 
   const permanentDeletePhoto = useCallback(async (name: string) => {
-    await supabase.storage.from('photos').remove([`archived/${name}`])
+    const { error } = await supabase.storage.from('photos').remove([`archived/${name}`])
+    if (error) { console.error('Failed to permanently delete photo:', error); return }
     setArchivedPhotos(prev => prev.filter(p => p.name !== name))
   }, [])
 
   const deletePhoto = useCallback(async (name: string) => {
-    await supabase.storage.from('photos').remove([name])
+    const { error } = await supabase.storage.from('photos').remove([name])
+    if (error) { console.error('Failed to delete photo:', error); return }
     setPhotos(prev => prev.filter(p => p.name !== name))
     setSelectedPhoto(prev => prev?.name === name ? null : prev)
   }, [])

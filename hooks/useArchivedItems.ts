@@ -8,15 +8,19 @@ export function useArchivedItems() {
   const [archivedNotes, setArchivedNotes] = useState<Note[]>([])
   const [archivedBookmarks, setArchivedBookmarks] = useState<Bookmark[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchArchived = useCallback(async () => {
     setLoading(true)
+    setError(null)
     const [notesRes, bookmarksRes] = await Promise.all([
       supabase.from('notes').select('*').not('archived_at', 'is', null).order('archived_at', { ascending: false }),
       supabase.from('bookmarks').select('*').not('archived_at', 'is', null).order('archived_at', { ascending: false }),
     ])
-    setArchivedNotes(notesRes.data ?? [])
-    setArchivedBookmarks(bookmarksRes.data ?? [])
+    if (notesRes.error) setError(notesRes.error.message)
+    else setArchivedNotes(notesRes.data ?? [])
+    if (bookmarksRes.error) setError(bookmarksRes.error.message)
+    else setArchivedBookmarks(bookmarksRes.data ?? [])
     setLoading(false)
   }, [])
 
@@ -44,6 +48,7 @@ export function useArchivedItems() {
     archivedNotes,
     archivedBookmarks,
     loading,
+    error,
     fetchArchived,
     restoreNote,
     permanentDeleteNote,

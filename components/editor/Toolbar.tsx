@@ -89,6 +89,8 @@ function ColorPicker({ editor }: { editor: Editor }) {
   )
 }
 
+const MOBILE_HIDDEN = new Set(['Underline', 'Strike', 'Inline code', 'Blockquote'])
+
 export function Toolbar({ editor }: ToolbarProps) {
   if (!editor) return null
 
@@ -170,12 +172,10 @@ export function Toolbar({ editor }: ToolbarProps) {
     },
   ]
 
-  const mobileHidden = new Set(['Underline', 'Strike', 'Inline code', 'Blockquote'])
-
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 md:py-1.5 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)] flex-shrink-0">
       {buttons.map((btn, i) => (
-        <div key={i} className={cn('flex items-center', mobileHidden.has(btn.label) && 'hidden md:flex')}>
+        <div key={i} className={cn('flex items-center', MOBILE_HIDDEN.has(btn.label) && 'hidden md:flex')}>
           {btn.separator && (
             <div className="w-px h-4 bg-[var(--color-border)] mx-1" />
           )}

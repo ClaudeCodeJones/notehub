@@ -49,7 +49,7 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
         includeChildren: true,
       }),
     ],
-    content: (() => { try { return JSON.parse(note.content) } catch { return note.content || '' } })(),
+    content: (() => { try { return JSON.parse(note.content) } catch (err) { console.error('Failed to parse note content:', err); return { type: 'doc', content: [{ type: 'paragraph' }] } } })(),
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       const json = JSON.stringify(editor.getJSON())

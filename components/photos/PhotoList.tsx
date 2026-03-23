@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
-import { ImageIcon, ImagePlus, Archive, Trash2 } from 'lucide-react'
+import { ImageIcon, ImagePlus, Archive, Trash2, ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Photo } from '@/hooks/usePhotos'
 import { PHOTOS_LIMIT } from '@/hooks/usePhotos'
@@ -15,6 +15,7 @@ interface PhotoListProps {
   onUpload: (files: FileList) => Promise<void>
   onArchive: (name: string) => Promise<void>
   onDelete: (name: string) => Promise<void>
+  onMobileBack?: () => void
 }
 
 function formatDate(iso: string) {
@@ -22,7 +23,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectPhoto, onUpload, onArchive, onDelete }: PhotoListProps) {
+export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectPhoto, onUpload, onArchive, onDelete, onMobileBack }: PhotoListProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const atLimit = photos.length >= PHOTOS_LIMIT
 
@@ -38,6 +39,14 @@ export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectP
       {/* Header */}
       <div className="px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
+          {onMobileBack && (
+            <button
+              onClick={onMobileBack}
+              className="md:hidden p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
           <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Photos</h2>
           <span className={cn('text-xs', atLimit ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]')}>
             {photos.length} / {PHOTOS_LIMIT}

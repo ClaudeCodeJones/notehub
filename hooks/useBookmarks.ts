@@ -44,8 +44,8 @@ export function useBookmarks(collectionId: string | null) {
 
     try {
       domain = new URL(normalizedUrl).hostname.replace(/^www\./, '')
-    } catch {
-      // keep domain null for malformed URLs
+    } catch (err) {
+      console.error('Failed to parse URL hostname:', err)
     }
 
     try {
@@ -55,8 +55,8 @@ export function useBookmarks(collectionId: string | null) {
         title = json.title
         domain = json.domain
       }
-    } catch {
-      // fall back to the values already set above
+    } catch (err) {
+      console.error('Failed to fetch bookmark title:', err)
     }
 
     const { data, error } = await supabase

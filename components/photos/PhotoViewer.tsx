@@ -1,10 +1,11 @@
 'use client'
 
-import { ImageIcon, ExternalLink } from 'lucide-react'
+import { ImageIcon, ExternalLink, ChevronLeft } from 'lucide-react'
 import type { Photo } from '@/hooks/usePhotos'
 
 interface PhotoViewerProps {
   photo: Photo | null
+  onMobileBack?: () => void
 }
 
 function formatDate(iso: string) {
@@ -12,7 +13,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function PhotoViewer({ photo }: PhotoViewerProps) {
+export function PhotoViewer({ photo, onMobileBack }: PhotoViewerProps) {
   if (!photo) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-bg-primary)] select-none gap-3">
@@ -24,8 +25,16 @@ export function PhotoViewer({ photo }: PhotoViewerProps) {
 
   return (
     <div className="flex-1 flex flex-col bg-[var(--color-bg-primary)] h-full overflow-hidden">
-      {/* Header spacer to match other panels */}
-      <div className="h-[88px] border-b border-[var(--color-border)] flex items-center px-8 flex-shrink-0">
+      {/* Header */}
+      <div className="h-[88px] border-b border-[var(--color-border)] flex items-center px-4 md:px-8 flex-shrink-0">
+        {onMobileBack && (
+          <button
+            onClick={onMobileBack}
+            className="md:hidden p-1 -ml-1 mr-2 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
         <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate flex-1">{photo.name}</p>
         <a
           href={photo.url}

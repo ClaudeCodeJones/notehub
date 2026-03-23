@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Project, Note } from '@/types'
 
@@ -21,31 +21,38 @@ export function useRealtime({
   onNoteUpdate,
   onNoteDelete,
 }: UseRealtimeOptions) {
+  const cbRef = useRef({ onProjectInsert, onProjectUpdate, onProjectDelete, onNoteInsert, onNoteUpdate, onNoteDelete })
+
+  // Keep ref current without re-creating the channel
+  useEffect(() => {
+    cbRef.current = { onProjectInsert, onProjectUpdate, onProjectDelete, onNoteInsert, onNoteUpdate, onNoteDelete }
+  })
+
   useEffect(() => {
     const channel = supabase
       .channel('notehub-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'projects' }, payload =>
-        onProjectInsert(payload.new as Project)
+        cbRef.current.onProjectInsert(payload.new as Project)
       )
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'projects' }, payload =>
-        onProjectUpdate(payload.new as Project)
+        cbRef.current.onProjectUpdate(payload.new as Project)
       )
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'projects' }, payload =>
-        onProjectDelete((payload.old as { id: string }).id)
+        cbRef.current.onProjectDelete((payload.old as { id: string }).id)
       )
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notes' }, payload =>
-        onNoteInsert(payload.new as Note)
+        cbRef.current.onNoteInsert(payload.new as Note)
       )
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notes' }, payload =>
-        onNoteUpdate(payload.new as Note)
+        cbRef.current.onNoteUpdate(payload.new as Note)
       )
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'notes' }, payload =>
-        onNoteDelete((payload.old as { id: string }).id)
+        cbRef.current.onNoteDelete((payload.old as { id: string }).id)
       )
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [onProjectInsert, onProjectUpdate, onProjectDelete, onNoteInsert, onNoteUpdate, onNoteDelete])
+  }, []) // channel is created once; callbacks are always current via cbRef
 }

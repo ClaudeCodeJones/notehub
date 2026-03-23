@@ -31,16 +31,19 @@ interface NavCardProps {
   count?: number
   onClick: () => void
   disabled?: boolean
+  loading?: boolean
   tint: string
 }
 
-function NavCard({ icon: Icon, label, sub, count, onClick, disabled, tint }: NavCardProps) {
+function NavCard({ icon: Icon, label, sub, count, onClick, disabled, loading, tint }: NavCardProps) {
   return (
     <div
-      onClick={disabled ? undefined : onClick}
+      onClick={disabled || loading ? undefined : onClick}
       className={cn(
         'relative rounded-2xl bg-[var(--color-bg-secondary)] overflow-hidden shadow-sm transition-all duration-150 min-h-[160px] md:min-h-[320px]',
-        disabled
+        loading
+          ? 'animate-pulse cursor-default'
+          : disabled
           ? 'opacity-40 cursor-default'
           : 'cursor-pointer hover:scale-[1.02] hover:shadow-md'
       )}
@@ -165,6 +168,7 @@ interface HomePanelProps {
   vaultItems: VaultItem[]
   collections: BookmarkCollection[]
   recents: RecentEntry[]
+  loading: boolean
   onSelectProject: (id: string) => void
   onSelectCollection: (id: string) => void
   onSelectVaultItem: (id: string) => void
@@ -181,6 +185,7 @@ export function HomePanel({
   vaultItems,
   collections,
   recents,
+  loading,
   onSelectProject,
   onSelectCollection,
   onSelectVaultItem,
@@ -254,28 +259,31 @@ export function HomePanel({
                 icon={FolderOpen}
                 label="Projects"
                 sub="Notes & docs"
-                count={projects.length}
+                count={loading ? undefined : projects.length}
                 tint={CARD_TINTS.projects}
                 onClick={() => projects[0] && onSelectProject(projects[0].id)}
-                disabled={projects.length === 0}
+                disabled={!loading && projects.length === 0}
+                loading={loading}
               />
               <NavCard
                 icon={Vault}
                 label="Vault"
                 sub="Private files"
-                count={vaultItems.length}
+                count={loading ? undefined : vaultItems.length}
                 tint={CARD_TINTS.vault}
                 onClick={() => vaultItems[0] && onSelectVaultItem(vaultItems[0].id)}
-                disabled={vaultItems.length === 0}
+                disabled={!loading && vaultItems.length === 0}
+                loading={loading}
               />
               <NavCard
                 icon={Bookmark}
                 label="Bookmarks"
                 sub="Saved links"
-                count={collections.length}
+                count={loading ? undefined : collections.length}
                 tint={CARD_TINTS.bookmarks}
                 onClick={() => collections[0] && onSelectCollection(collections[0].id)}
-                disabled={collections.length === 0}
+                disabled={!loading && collections.length === 0}
+                loading={loading}
               />
               <NavCard
                 icon={ImageIcon}

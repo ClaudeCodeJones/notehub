@@ -11,6 +11,7 @@ export interface Project {
 export interface Note {
   id: string
   project_id: string
+  vault_id: string | null
   title: string
   content: string
   note_type: 'checkbox' | 'note'

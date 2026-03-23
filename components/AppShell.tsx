@@ -23,6 +23,7 @@ import { useSearch } from '@/hooks/useSearch'
 import { PhotoList } from './photos/PhotoList'
 import { PhotoViewer } from './photos/PhotoViewer'
 import { usePhotos } from '@/hooks/usePhotos'
+import type { Photo } from '@/hooks/usePhotos'
 import type { NoteResult, BookmarkResult } from '@/hooks/useSearch'
 
 type MobileView = 'sidebar' | 'notes' | 'editor'
@@ -37,12 +38,13 @@ export function AppShell() {
   const [photosMode, setPhotosMode] = useState(false)
   const [searchMode, setSearchMode] = useState(false)
   const [homeMode, setHomeMode] = useState(true)
-  const { photos, archivedPhotos, loading: photosLoading, uploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto, deletePhoto } = usePhotos()
+  const { photos, archivedPhotos, loading: photosLoading, uploading: photosUploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto, deletePhoto } = usePhotos()
   const { query, setQuery, noteResults, bookmarkResults, loading: searchLoading } = useSearch()
   const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
 
   const {
     projects,
+    loading: projectsLoading,
     createProject,
     updateProject,
     renameProject,
@@ -68,9 +70,9 @@ export function AppShell() {
     deleteFromRealtime: deleteNote_rt,
   } = useNotes(activeProjectId, activeVaultItemId)
 
-  const { collections, createCollection, reorderCollections, updateBookmarkCollection } = useBookmarkCollections()
+  const { collections, loading: collectionsLoading, createCollection, reorderCollections, updateBookmarkCollection } = useBookmarkCollections()
   const { recents, recordRecent } = useRecents()
-  const { vaultItems, createVaultItem, updateVaultItem, renameVaultItem, reorderVaultItems } = useVaultItems()
+  const { vaultItems, loading: vaultLoading, createVaultItem, updateVaultItem, renameVaultItem, reorderVaultItems } = useVaultItems()
 
   const { bookmarks, loading: bookmarksLoading, createBookmark, archiveBookmark, reorderBookmarks } =
     useBookmarks(activeCollectionId)
@@ -137,6 +139,12 @@ export function AppShell() {
     setArchiveMode(false)
     setSearchMode(false)
     setHomeMode(false)
+    setMobileView('notes')
+  }
+
+  function handleSelectPhoto(photo: Photo) {
+    setSelectedPhoto(photo)
+    if (photosMode) setMobileView('editor')
   }
 
   function handleOpenArchive() {
@@ -217,7 +225,10 @@ export function AppShell() {
 
   function handleMobileBack() {
     if (mobileView === 'editor') setMobileView('notes')
-    else if (mobileView === 'notes') setMobileView('sidebar')
+    else if (mobileView === 'notes') {
+      if (photosMode) setPhotosMode(false)
+      setMobileView('sidebar')
+    }
   }
 
   useSwipeBack(handleMobileBack, mobileView !== 'sidebar')
@@ -300,7 +311,6 @@ export function AppShell() {
           onReorderVaultItems={reorderVaultItems}
           onUpdateVaultItem={updateVaultItem}
           onRenameVaultItem={renameVaultItem}
-          recents={recents}
           onOpenArchive={handleOpenArchive}
           archiveMode={archiveMode}
           onOpenPhotos={handleOpenPhotos}
@@ -329,6 +339,7 @@ export function AppShell() {
             vaultItems={vaultItems}
             collections={collections}
             recents={recents}
+            loading={projectsLoading || vaultLoading || collectionsLoading}
             onSelectProject={handleSelectProject}
             onSelectCollection={handleSelectCollection}
             onSelectVaultItem={handleSelectVaultItem}
@@ -353,12 +364,13 @@ export function AppShell() {
           <PhotoList
             photos={photos}
             loading={photosLoading}
-            uploading={uploading}
+            uploading={photosUploading}
             selectedPhoto={selectedPhoto}
-            onSelectPhoto={setSelectedPhoto}
+            onSelectPhoto={handleSelectPhoto}
             onUpload={uploadPhoto}
             onArchive={archivePhoto}
             onDelete={deletePhoto}
+            onMobileBack={handleMobileBack}
           />
         ) : archiveMode ? (
           <ArchivePanel
@@ -401,10 +413,10 @@ export function AppShell() {
         'absolute inset-0 h-full flex flex-col transition-transform duration-300 ease-in-out',
         'md:relative md:inset-auto md:flex-1 md:translate-x-0',
         homeMode && 'md:hidden',
-        photosMode ? 'translate-x-0' : mobileView === 'editor' ? 'translate-x-0' : 'translate-x-full',
+        mobileView === 'editor' ? 'translate-x-0' : 'translate-x-full',
       )}>
         {photosMode ? (
-          <PhotoViewer photo={selectedPhoto} />
+          <PhotoViewer photo={selectedPhoto} onMobileBack={handleMobileBack} />
         ) : activeBookmark ? (
           <BookmarkDetail
             key={activeBookmark.id}

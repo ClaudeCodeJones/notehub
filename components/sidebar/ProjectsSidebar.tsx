@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -17,7 +17,7 @@ import { CollectionItem } from './CollectionItem'
 import { VaultItem } from './VaultItem'
 import { cn } from '@/lib/utils'
 import type { Project, BookmarkCollection, VaultItem as VaultItemType } from '@/types'
-import type { RecentEntry } from '@/hooks/useRecents'
+
 
 interface ProjectsSidebarProps {
   projects: Project[]
@@ -41,7 +41,6 @@ interface ProjectsSidebarProps {
   onReorderVaultItems: (items: VaultItemType[]) => void
   onUpdateVaultItem: (id: string, color: string) => void
   onRenameVaultItem: (id: string, name: string) => void
-  recents: RecentEntry[]
   onOpenArchive: () => void
   archiveMode: boolean
   onOpenPhotos: () => void
@@ -75,7 +74,6 @@ export function ProjectsSidebar({
   onReorderVaultItems,
   onUpdateVaultItem,
   onRenameVaultItem,
-  recents,
   onOpenArchive,
   archiveMode,
   onOpenPhotos,
@@ -108,6 +106,11 @@ export function ProjectsSidebar({
   const collectionInputRef = useRef<HTMLInputElement>(null)
   const vaultInputRef = useRef<HTMLInputElement>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const focusTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    return () => { if (focusTimerRef.current) clearTimeout(focusTimerRef.current) }
+  }, [])
 
   const projectSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -181,17 +184,17 @@ export function ProjectsSidebar({
 
   function startCreatingVaultItem() {
     setIsCreatingVaultItem(true)
-    setTimeout(() => vaultInputRef.current?.focus(), 0)
+    focusTimerRef.current = setTimeout(() => vaultInputRef.current?.focus(), 0)
   }
 
   function startCreatingProject() {
     setIsCreatingProject(true)
-    setTimeout(() => projectInputRef.current?.focus(), 0)
+    focusTimerRef.current = setTimeout(() => projectInputRef.current?.focus(), 0)
   }
 
   function startCreatingCollection() {
     setIsCreatingCollection(true)
-    setTimeout(() => collectionInputRef.current?.focus(), 0)
+    focusTimerRef.current = setTimeout(() => collectionInputRef.current?.focus(), 0)
   }
 
   return (
@@ -229,137 +232,13 @@ export function ProjectsSidebar({
           Home
         </button>
 
-        {/* ── Recent ── */}
-        {recents.length > 0 && (() => {
-          type RecentResolved =
-            | (Project & { type: 'project' })
-            | (VaultItemType & { type: 'vault' })
-            | (BookmarkCollection & { type: 'collection' })
-          const resolvedRecents = recents.flatMap((r): RecentResolved[] => {
-            if (r.type === 'project') {
-              const p = projects.find(x => x.id === r.id)
-              return p ? [{ ...p, type: 'project' as const }] : []
-            } else if (r.type === 'vault') {
-              const v = vaultItems.find(x => x.id === r.id)
-              return v ? [{ ...v, type: 'vault' as const }] : []
-            } else {
-              const c = collections.find(x => x.id === r.id)
-              return c ? [{ ...c, type: 'collection' as const }] : []
-            }
-          })
-          if (resolvedRecents.length === 0) return null
-          return (
-            <>
-              <div className="flex items-center px-2 py-0.5 mb-0.5">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] bg-[var(--color-bg-tertiary)] rounded px-2 py-0.5">
-                  Recent
-                </p>
-              </div>
-              <div className="px-2 flex flex-col gap-1 mb-1">
-                {resolvedRecents.slice(0, 3).map(item => {
-                  const isActive = item.type === 'project'
-                    ? item.id === activeProjectId
-                    : item.type === 'vault'
-                    ? item.id === activeVaultItemId
-                    : item.id === activeCollectionId
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => item.type === 'project' ? onSelectProject(item.id) : item.type === 'vault' ? onSelectVaultItem(item.id) : onSelectCollection(item.id)}
-                      className={cn(
-                        'flex items-center gap-2 h-10 md:h-8 px-3 rounded-lg cursor-pointer select-none transition-colors overflow-hidden',
-                        isActive ? 'bg-[var(--color-bg-tertiary)]' : 'hover:bg-[var(--color-bg-secondary)]'
-                      )}
-                    >
-                      {item.type === 'project' ? (
-                        <FolderOpen size={15} className="flex-shrink-0" style={{ color: item.color }} />
-                      ) : item.type === 'vault' ? (
-                        <Vault size={15} className="flex-shrink-0" style={{ color: item.color }} />
-                      ) : (
-                        <Bookmark size={14} className="flex-shrink-0" style={{ color: item.color }} />
-                      )}
-                      <span className={cn('text-base md:text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
-                        {item.name}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="my-2 border-t border-[var(--color-border)]" />
-            </>
-          )
-        })()}
-
-        {/* ── Vault ── */}
-        <div className="flex items-center justify-between px-2 mb-0.5">
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] bg-[var(--color-bg-tertiary)] rounded px-2 py-0.5">
-              Vault
-            </p>
-            {hasMoreVault && (
-              <button
-                onClick={() => setShowAllVault(v => !v)}
-                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
-              >
-                {showAllVault ? '↑ Less' : 'View all →'}
-              </button>
-            )}
-          </div>
-          <button
-            onClick={startCreatingVaultItem}
-            title="New vault item"
-            className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors"
-          >
-            <Plus size={12} />
-          </button>
-        </div>
-
-        <DndContext
-          sensors={vaultSensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleVaultDragEnd}
-        >
-          <SortableContext
-            items={vaultItems.map(v => v.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="px-2 flex flex-col gap-1">
-              {visibleVaultItems.map(item => (
-                <VaultItem
-                  key={item.id}
-                  item={item}
-                  isActive={item.id === activeVaultItemId}
-                  onSelect={onSelectVaultItem}
-                  onUpdateColor={(color) => onUpdateVaultItem(item.id, color)}
-                  onRename={(name) => onRenameVaultItem(item.id, name)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-
-        {isCreatingVaultItem && (
-          <div className="mt-1 px-1">
-            <input
-              ref={vaultInputRef}
-              type="text"
-              value={newVaultItemName}
-              onChange={e => setNewVaultItemName(e.target.value)}
-              onKeyDown={handleVaultItemKeyDown}
-              onBlur={handleVaultItemSubmit}
-              placeholder="Vault item name…"
-              className="w-full text-sm bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] rounded-lg px-3 py-2 outline-none ring-2 ring-[var(--color-accent)] placeholder:text-[var(--color-text-muted)]"
-            />
-          </div>
-        )}
-
         {/* ── Divider ── */}
         <div className="my-3 border-t border-[var(--color-border)]" />
 
         {/* ── Projects ── */}
         <div className="flex items-center justify-between px-2 py-0.5 mb-0.5">
           <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] bg-[var(--color-bg-tertiary)] rounded px-2 py-0.5">
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
               Projects
             </p>
             {hasMoreProjects && (
@@ -424,10 +303,76 @@ export function ProjectsSidebar({
         {/* ── Divider ── */}
         <div className="my-3 border-t border-[var(--color-border)]" />
 
+        {/* ── Vault ── */}
+        <div className="flex items-center justify-between px-2 mb-0.5">
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
+              Vault
+            </p>
+            {hasMoreVault && (
+              <button
+                onClick={() => setShowAllVault(v => !v)}
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+              >
+                {showAllVault ? '↑ Less' : 'View all →'}
+              </button>
+            )}
+          </div>
+          <button
+            onClick={startCreatingVaultItem}
+            title="New vault item"
+            className="p-0.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+          >
+            <Plus size={12} />
+          </button>
+        </div>
+
+        <DndContext
+          sensors={vaultSensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleVaultDragEnd}
+        >
+          <SortableContext
+            items={vaultItems.map(v => v.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="px-2 flex flex-col gap-1">
+              {visibleVaultItems.map(item => (
+                <VaultItem
+                  key={item.id}
+                  item={item}
+                  isActive={item.id === activeVaultItemId}
+                  onSelect={onSelectVaultItem}
+                  onUpdateColor={(color) => onUpdateVaultItem(item.id, color)}
+                  onRename={(name) => onRenameVaultItem(item.id, name)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        {isCreatingVaultItem && (
+          <div className="mt-1 px-1">
+            <input
+              ref={vaultInputRef}
+              type="text"
+              value={newVaultItemName}
+              onChange={e => setNewVaultItemName(e.target.value)}
+              onKeyDown={handleVaultItemKeyDown}
+              onBlur={handleVaultItemSubmit}
+              placeholder="Vault item name…"
+              className="w-full text-sm bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] rounded-lg px-3 py-2 outline-none ring-2 ring-[var(--color-accent)] placeholder:text-[var(--color-text-muted)]"
+            />
+          </div>
+        )}
+
+        {/* ── Divider ── */}
+        <div className="my-3 border-t border-[var(--color-border)]" />
+
         {/* ── Bookmarks ── */}
         <div className="flex items-center justify-between px-2 mb-0.5">
           <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] bg-[var(--color-bg-tertiary)] rounded px-2 py-0.5">
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--color-text-secondary)]">
               Bookmarks
             </p>
             {hasMoreCollections && (
@@ -493,7 +438,7 @@ export function ProjectsSidebar({
         <div className="flex items-center justify-between px-2 mb-1">
           <button onClick={onOpenPhotos}>
             <p className={cn(
-              'text-xs font-semibold uppercase tracking-widest bg-[var(--color-bg-tertiary)] rounded px-2 py-0.5',
+              'text-xs font-bold tracking-widest uppercase',
               photosMode ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
             )}>
               Photos
