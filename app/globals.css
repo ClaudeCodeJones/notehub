@@ -131,13 +131,14 @@ body {
 }
 .notehub-editor ul[data-type="taskList"] > li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 .notehub-editor ul[data-type="taskList"] > li > label {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  padding-top: 0.2em;
 }
 .notehub-editor ul[data-type="taskList"] > li > label input[type="checkbox"] {
   width: 0.9375rem;
@@ -174,14 +175,24 @@ body {
   height: 0;
 }
 
-/* Note list (file icon per paragraph line — skip empty paragraphs) */
-.notehub-note-editor .ProseMirror > p:not(:has(> br:only-child)),
-.notehub-note-editor .tiptap > p:not(:has(> br:only-child)) {
+/* Explicit reset for non-note types — ensures no file icon bleeds through */
+.notehub-note-editor:not(.note-type-note) .ProseMirror > p,
+.notehub-note-editor:not(.note-type-note) .tiptap > p {
+  padding-left: 0 !important;
+}
+.notehub-note-editor:not(.note-type-note) .ProseMirror > p::before,
+.notehub-note-editor:not(.note-type-note) .tiptap > p::before {
+  content: none !important;
+}
+
+/* Note list (file icon per paragraph line — only for 'note' type, skip empty paragraphs) */
+.notehub-note-editor.note-type-note .ProseMirror > p:not(:has(> br:only-child)),
+.notehub-note-editor.note-type-note .tiptap > p:not(:has(> br:only-child)) {
   padding-left: 24px;
   position: relative;
 }
-.notehub-note-editor .ProseMirror > p:not(:has(> br:only-child))::before,
-.notehub-note-editor .tiptap > p:not(:has(> br:only-child))::before {
+.notehub-note-editor.note-type-note .ProseMirror > p:not(:has(> br:only-child))::before,
+.notehub-note-editor.note-type-note .tiptap > p:not(:has(> br:only-child))::before {
   content: '';
   position: absolute;
   left: 0;

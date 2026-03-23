@@ -3,9 +3,15 @@
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Archive, Pin } from 'lucide-react'
+import { Archive, Pin, CheckSquare, FileText, AlignLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
+
+const TYPE_ICON = {
+  checkbox: CheckSquare,
+  note: FileText,
+  text: AlignLeft,
+} as const
 
 interface NoteItemProps {
   note: Note
@@ -65,9 +71,12 @@ export function NoteItem({ note, isActive, projectColor, onSelect, onArchive, on
       )}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
-          {note.title || 'Untitled'}
-        </p>
+        <div className="flex items-center gap-1.5 min-w-0">
+          {(() => { const Icon = TYPE_ICON[note.note_type]; return <Icon size={11} className="flex-shrink-0 text-[var(--color-text-muted)]" style={{ opacity: 0.6 }} /> })()}
+          <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">
+            {note.title || 'Untitled'}
+          </p>
+        </div>
         <span className="text-xs text-[var(--color-text-muted)]">{date}</span>
       </div>
 

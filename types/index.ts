@@ -14,7 +14,7 @@ export interface Note {
   vault_id: string | null
   title: string
   content: string
-  note_type: 'checkbox' | 'note'
+  note_type: 'checkbox' | 'note' | 'text'
   sort_order: number
   pinned: boolean
   created_at: string

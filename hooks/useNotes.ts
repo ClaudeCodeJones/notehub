@@ -38,7 +38,7 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
     })
   }, [projectId, vaultId])
 
-  const createNote = useCallback(async (noteType: 'checkbox' | 'note' = 'checkbox'): Promise<Note | null> => {
+  const createNote = useCallback(async (noteType: 'checkbox' | 'note' | 'text' = 'checkbox'): Promise<Note | null> => {
     const vid = vaultIdRef.current
     const pid = projectIdRef.current
     if (!vid && !pid) return null
@@ -53,7 +53,7 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
       .select()
       .single()
     if (error || !data) return null
-    setNotes(prev => [...prev, data])
+    setNotes(prev => prev.some(n => n.id === data.id) ? prev : [...prev, data])
     return data
   }, [])
 
@@ -65,7 +65,7 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
     await supabase.from('notes').update(updates).eq('id', id)
   }, [])
 
-  const updateNoteType = useCallback(async (id: string, note_type: 'checkbox' | 'note') => {
+  const updateNoteType = useCallback(async (id: string, note_type: 'checkbox' | 'note' | 'text') => {
     setNotes(prev => prev.map(n => (n.id === id ? { ...n, note_type } : n)))
     await supabase.from('notes').update({ note_type }).eq('id', id)
   }, [])

@@ -22,6 +22,7 @@ import { PROJECT_COLORS } from '@/lib/constants'
 
 interface ToolbarProps {
   editor: Editor | null
+  noteType: 'checkbox' | 'note' | 'text'
 }
 
 interface BtnDef {
@@ -91,29 +92,31 @@ function ColorPicker({ editor }: { editor: Editor }) {
 
 const MOBILE_HIDDEN = new Set(['Underline', 'Strike', 'Inline code', 'Blockquote'])
 
-export function Toolbar({ editor }: ToolbarProps) {
+export function Toolbar({ editor, noteType }: ToolbarProps) {
   if (!editor) return null
 
   const buttons: BtnDef[] = [
-    {
-      icon: <Heading1 size={14} />,
-      label: 'Heading 1',
-      action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
-      isActive: editor.isActive('heading', { level: 1 }),
-    },
-    {
-      icon: <Heading2 size={14} />,
-      label: 'Heading 2',
-      action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-      isActive: editor.isActive('heading', { level: 2 }),
-    },
-    {
-      icon: <Heading3 size={14} />,
-      label: 'Heading 3',
-      action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-      isActive: editor.isActive('heading', { level: 3 }),
-      separator: true,
-    },
+    ...(noteType === 'text' ? [
+      {
+        icon: <Heading1 size={14} />,
+        label: 'Heading 1',
+        action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+        isActive: editor.isActive('heading', { level: 1 }),
+      },
+      {
+        icon: <Heading2 size={14} />,
+        label: 'Heading 2',
+        action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+        isActive: editor.isActive('heading', { level: 2 }),
+      },
+      {
+        icon: <Heading3 size={14} />,
+        label: 'Heading 3',
+        action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+        isActive: editor.isActive('heading', { level: 3 }),
+        separator: true,
+      },
+    ] : []),
     {
       icon: <Bold size={14} />,
       label: 'Bold',

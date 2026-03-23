@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -10,12 +10,12 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-import { Plus, ChevronLeft } from 'lucide-react'
+import { Plus, ChevronLeft, CheckSquare, FileText, AlignLeft } from 'lucide-react'
 import { NoteItem } from './NoteItem'
+import { cn } from '@/lib/utils'
 import type { Note, Project, VaultItem } from '@/types'
 
-type NoteType = 'checkbox' | 'note'
-const STORAGE_KEY = 'notehub-last-note-type'
+type NoteType = 'checkbox' | 'note' | 'text'
 
 interface NotesListProps {
   project: Project | VaultItem | null
@@ -31,6 +31,12 @@ interface NotesListProps {
   onMobileBack?: () => void
 }
 
+const NOTE_TYPE_OPTIONS: { type: NoteType; icon: React.ElementType; label: string }[] = [
+  { type: 'checkbox', icon: CheckSquare, label: 'Checklist' },
+  { type: 'note',     icon: FileText,    label: 'Note' },
+  { type: 'text',     icon: AlignLeft,   label: 'Long note' },
+]
+
 export function NotesList({
   project,
   notes,
@@ -44,7 +50,8 @@ export function NotesList({
   onReorderNotes,
   onMobileBack,
 }: NotesListProps) {
-  const [lastType, setLastType] = useState<NoteType>('checkbox')
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const pickerRef = useRef<HTMLDivElement>(null)
 
   const pinnedNotes = notes.filter(n => n.pinned)
   const unpinnedNotes = notes.filter(n => !n.pinned)
@@ -54,9 +61,13 @@ export function NotesList({
   )
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'note' || stored === 'checkbox') setLastType(stored)
-  }, [])
+    if (!pickerOpen) return
+    function handleOutside(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) setPickerOpen(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [pickerOpen])
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
@@ -88,13 +99,34 @@ export function NotesList({
             {project.name}
           </h2>
         </div>
-        <button
-          onClick={() => onCreateNote(lastType)}
-          title="New note"
-          className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
-        >
-          <Plus size={16} />
-        </button>
+        <div ref={pickerRef} className="relative flex-shrink-0">
+          <button
+            onClick={() => setPickerOpen(v => !v)}
+            title="New note"
+            className={cn(
+              'p-1 rounded-md transition-colors',
+              pickerOpen
+                ? 'text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]'
+            )}
+          >
+            <Plus size={16} className={cn('transition-transform duration-200', pickerOpen && 'rotate-45')} />
+          </button>
+          {pickerOpen && (
+            <div className="absolute top-full right-0 mt-2 flex flex-col gap-0.5 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-lg p-1.5 w-36 z-40">
+              {NOTE_TYPE_OPTIONS.map(({ type, icon: Icon, label }) => (
+                <button
+                  key={type}
+                  onClick={() => { onCreateNote(type); setPickerOpen(false) }}
+                  className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+                >
+                  <Icon size={14} className="text-[var(--color-accent)] flex-shrink-0" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Notes */}

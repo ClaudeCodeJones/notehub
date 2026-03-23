@@ -8,7 +8,8 @@ import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
-import { ChevronLeft, FileText, CheckSquare } from 'lucide-react'
+import Link from '@tiptap/extension-link'
+import { ChevronLeft } from 'lucide-react'
 import { Toolbar } from './Toolbar'
 import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
@@ -30,7 +31,7 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ link: false }),
       TaskList,
       TaskItem.configure({ nested: true }).extend({
         addKeyboardShortcuts() {
@@ -41,6 +42,7 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
       }),
       TextStyle,
       Color,
+      Link.configure({ openOnClick: true, autolink: true }),
       Placeholder.configure({
         placeholder: ({ node }) => {
           if (node.type.name === 'taskItem') return "Press 'Enter' to add list item"
@@ -114,7 +116,7 @@ return (
       </div>
 
       {/* Formatting toolbar */}
-      <Toolbar editor={editor} />
+      <Toolbar editor={editor} noteType={note.note_type} />
 
       {/* Title */}
       <div className="px-8 pt-8 pb-3 flex-shrink-0">
@@ -129,34 +131,12 @@ return (
         />
       </div>
 
-      {/* Insert buttons */}
-      <div className="px-8 pb-4 flex-shrink-0">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => editor?.chain().focus('end').insertContent({ type: 'paragraph' }).run()}
-            className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
-          >
-            <FileText size={13} />
-            + Text
-          </button>
-          <button
-            onClick={() => editor?.chain().focus('end').insertContent({
-              type: 'taskList',
-              content: [{ type: 'taskItem', attrs: { checked: false }, content: [{ type: 'paragraph' }] }]
-            }).run()}
-            className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
-          >
-            <CheckSquare size={13} />
-            + Checklist
-          </button>
-        </div>
-      </div>
 
       {/* Rich text editor */}
-      <div className="flex-1 overflow-y-auto px-8 py-2 min-h-0">
+      <div className={cn('flex-1 overflow-y-auto px-8 py-2 min-h-0 notehub-note-editor', note.note_type === 'note' && 'note-type-note')}>
         <EditorContent
           editor={editor}
-          className={cn('notehub-editor', 'notehub-note-editor')}
+          className="notehub-editor"
         />
       </div>
 

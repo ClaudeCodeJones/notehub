@@ -248,7 +248,7 @@ export function AppShell() {
     if (item) handleSelectVaultItem(item.id)
   }
 
-  async function handleCreateNote(type: 'checkbox' | 'note' = 'note') {
+  async function handleCreateNote(type: 'checkbox' | 'note' | 'text' = 'note') {
     const note = await createNote(type)
     if (note) {
       setActiveNoteId(note.id)
