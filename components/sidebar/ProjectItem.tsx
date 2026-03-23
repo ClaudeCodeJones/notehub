@@ -122,7 +122,7 @@ export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRena
         onTouchEnd={isEditing ? undefined : handleTouchEnd}
         onTouchMove={isEditing ? undefined : handleTouchEnd}
         className={cn(
-          'flex items-center gap-2 h-8 px-3 rounded-lg select-none transition-colors overflow-hidden',
+          'flex items-center gap-2 h-10 md:h-8 px-3 rounded-lg select-none transition-colors overflow-hidden',
           isEditing ? 'cursor-text' : 'cursor-pointer'
         )}
       >
@@ -139,7 +139,7 @@ export function ProjectItem({ project, isActive, onSelect, onUpdateColor, onRena
             className="w-full text-sm bg-transparent outline-none border-none text-[var(--color-text-primary)]"
           />
         ) : (
-          <span className={cn('text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
+          <span className={cn('text-base md:text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
             {project.name || 'Untitled project'}
           </span>
         )}

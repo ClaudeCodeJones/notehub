@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { FolderOpen, Vault, Bookmark, Image as ImageIcon, Search, Plus, FolderPlus, BookmarkPlus } from 'lucide-react'
+import { FolderOpen, Vault, Bookmark, Image as ImageIcon, Search, Plus, FolderPlus, BookmarkPlus, ImagePlus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Project, VaultItem, BookmarkCollection } from '@/types'
 import type { RecentEntry } from '@/hooks/useRecents'
@@ -108,13 +108,15 @@ function FABRow({ icon: Icon, label, onClick }: { icon: React.ElementType; label
   )
 }
 
-function FAB({ onCreateProject, onCreateCollection, onCreateVaultItem }: {
+function FAB({ onCreateProject, onCreateCollection, onCreateVaultItem, onUploadPhoto }: {
   onCreateProject: () => void
   onCreateCollection: () => void
   onCreateVaultItem: () => void
+  onUploadPhoto: (files: FileList) => void
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -136,11 +138,20 @@ function FAB({ onCreateProject, onCreateCollection, onCreateVaultItem }: {
       >
         <Plus size={18} className={cn('transition-transform duration-200', open && 'rotate-45')} />
       </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={e => { if (e.target.files?.length) { onUploadPhoto(e.target.files); e.target.value = '' } }}
+      />
       {open && (
         <div className="absolute top-full right-0 mt-2 flex flex-col gap-0.5 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-2xl shadow-lg p-2 w-48 z-40">
           <FABRow icon={FolderPlus} label="New Project" onClick={() => handle(onCreateProject)} />
           <FABRow icon={BookmarkPlus} label="New Collection" onClick={() => handle(onCreateCollection)} />
           <FABRow icon={Vault} label="Add to Vault" onClick={() => handle(onCreateVaultItem)} />
+          <FABRow icon={ImagePlus} label="Upload Photo" onClick={() => handle(() => fileInputRef.current?.click())} />
         </div>
       )}
     </div>
@@ -162,6 +173,7 @@ interface HomePanelProps {
   onCreateProject: () => void
   onCreateCollection: () => void
   onCreateVaultItem: () => void
+  onUploadPhoto: (files: FileList) => void
 }
 
 export function HomePanel({
@@ -177,6 +189,7 @@ export function HomePanel({
   onCreateProject,
   onCreateCollection,
   onCreateVaultItem,
+  onUploadPhoto,
 }: HomePanelProps) {
   const resolvedRecents: ResolvedRecent[] = recents.flatMap((r): ResolvedRecent[] => {
     if (r.type === 'project') {
@@ -217,6 +230,7 @@ export function HomePanel({
               onCreateProject={onCreateProject}
               onCreateCollection={onCreateCollection}
               onCreateVaultItem={onCreateVaultItem}
+              onUploadPhoto={onUploadPhoto}
             />
             <button
               onClick={onOpenSearch}

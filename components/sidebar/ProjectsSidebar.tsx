@@ -217,7 +217,7 @@ export function ProjectsSidebar({
         <button
           onClick={onOpenHome}
           className={cn(
-            'flex items-center gap-2 h-8 w-full px-3 rounded-lg text-sm select-none transition-colors mb-1',
+            'flex items-center gap-2 h-10 md:h-8 w-full px-3 rounded-lg text-base md:text-sm select-none transition-colors mb-1',
             homeMode
               ? 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] font-semibold'
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
@@ -265,7 +265,7 @@ export function ProjectsSidebar({
                       key={item.id}
                       onClick={() => item.type === 'project' ? onSelectProject(item.id) : item.type === 'vault' ? onSelectVaultItem(item.id) : onSelectCollection(item.id)}
                       className={cn(
-                        'flex items-center gap-2 h-8 px-3 rounded-lg cursor-pointer select-none transition-colors overflow-hidden',
+                        'flex items-center gap-2 h-10 md:h-8 px-3 rounded-lg cursor-pointer select-none transition-colors overflow-hidden',
                         isActive ? 'bg-[var(--color-bg-tertiary)]' : 'hover:bg-[var(--color-bg-secondary)]'
                       )}
                     >
@@ -276,7 +276,7 @@ export function ProjectsSidebar({
                       ) : (
                         <Bookmark size={14} className="flex-shrink-0" style={{ color: item.color }} />
                       )}
-                      <span className={cn('text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
+                      <span className={cn('text-base md:text-sm truncate text-[var(--color-text-primary)]', isActive && 'font-semibold')}>
                         {item.name}
                       </span>
                     </div>
@@ -526,7 +526,7 @@ export function ProjectsSidebar({
         <button
           onClick={onOpenSearch}
           className={cn(
-            'w-full flex items-center gap-2 h-9 px-3 rounded-lg text-sm transition-colors select-none',
+            'w-full flex items-center gap-2 h-11 md:h-9 px-3 rounded-lg text-base md:text-sm transition-colors select-none',
             searchMode
               ? 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] font-semibold'
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'
@@ -538,7 +538,7 @@ export function ProjectsSidebar({
         <button
           onClick={onOpenArchive}
           className={cn(
-            'w-full flex items-center gap-2 h-9 px-3 rounded-lg text-sm transition-colors select-none',
+            'w-full flex items-center gap-2 h-11 md:h-9 px-3 rounded-lg text-base md:text-sm transition-colors select-none',
             archiveMode
               ? 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] font-semibold'
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)]'

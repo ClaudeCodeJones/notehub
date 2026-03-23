@@ -335,6 +335,7 @@ export function AppShell() {
             onCreateProject={handleFabCreateProject}
             onCreateCollection={handleFabCreateCollection}
             onCreateVaultItem={handleFabCreateVaultItem}
+            onUploadPhoto={uploadPhoto}
           />
         ) : searchMode ? (
           <SearchPanel
