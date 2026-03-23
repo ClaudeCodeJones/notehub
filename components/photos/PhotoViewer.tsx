@@ -1,10 +1,12 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import { ImageIcon, ExternalLink, ChevronLeft } from 'lucide-react'
 import type { Photo } from '@/hooks/usePhotos'
 
 interface PhotoViewerProps {
   photo: Photo | null
+  onRename?: (oldName: string, newName: string) => void
   onMobileBack?: () => void
 }
 
@@ -13,7 +15,32 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function PhotoViewer({ photo, onMobileBack }: PhotoViewerProps) {
+export function PhotoViewer({ photo, onRename, onMobileBack }: PhotoViewerProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (isEditing) inputRef.current?.focus()
+  }, [isEditing])
+
+  function startEditing() {
+    if (!photo) return
+    const nameWithoutExt = photo.name.replace(/\.[^.]+$/, '')
+    setEditName(nameWithoutExt)
+    setIsEditing(true)
+  }
+
+  function commitRename() {
+    if (photo && onRename) onRename(photo.name, editName)
+    setIsEditing(false)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') { e.preventDefault(); commitRename() }
+    if (e.key === 'Escape') setIsEditing(false)
+  }
+
   if (!photo) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-bg-primary)] select-none gap-3">
@@ -35,7 +62,24 @@ export function PhotoViewer({ photo, onMobileBack }: PhotoViewerProps) {
             <ChevronLeft size={20} />
           </button>
         )}
-        <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate flex-1">{photo.name}</p>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            value={editName}
+            onChange={e => setEditName(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={handleKeyDown}
+            className="flex-1 text-sm font-semibold bg-transparent outline-none border-b border-[var(--color-accent)] text-[var(--color-text-primary)] mr-4"
+          />
+        ) : (
+          <p
+            onDoubleClick={startEditing}
+            className="text-sm font-semibold text-[var(--color-text-primary)] truncate flex-1 cursor-text"
+            title="Double-click to rename"
+          >
+            {photo.name}
+          </p>
+        )}
         <a
           href={photo.url}
           target="_blank"

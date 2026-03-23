@@ -71,6 +71,16 @@ export function usePhotos() {
     }
   }, [loadPhotos, photos.length])
 
+  const renamePhoto = useCallback(async (oldName: string, newName: string) => {
+    if (!newName.trim() || newName === oldName) return
+    const ext = oldName.split('.').pop()
+    const finalName = newName.includes('.') ? newName : `${newName}.${ext}`
+    const { error } = await supabase.storage.from('photos').move(oldName, finalName)
+    if (error) { console.error('Failed to rename photo:', error); return }
+    const newUrl = supabase.storage.from('photos').getPublicUrl(finalName).data.publicUrl
+    setPhotos(prev => prev.map(p => p.name === oldName ? { ...p, name: finalName, url: newUrl } : p))
+  }, [])
+
   const archivePhoto = useCallback(async (name: string) => {
     const { error } = await supabase.storage.from('photos').move(name, `archived/${name}`)
     if (error) { console.error('Failed to archive photo:', error); return }
@@ -125,6 +135,7 @@ export function usePhotos() {
     selectedPhoto,
     setSelectedPhoto,
     uploadPhoto,
+    renamePhoto,
     archivePhoto,
     restorePhoto,
     permanentDeletePhoto,

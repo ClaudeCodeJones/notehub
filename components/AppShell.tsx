@@ -38,7 +38,7 @@ export function AppShell() {
   const [photosMode, setPhotosMode] = useState(false)
   const [searchMode, setSearchMode] = useState(false)
   const [homeMode, setHomeMode] = useState(true)
-  const { photos, archivedPhotos, loading: photosLoading, uploading: photosUploading, selectedPhoto, setSelectedPhoto, uploadPhoto, archivePhoto, restorePhoto, permanentDeletePhoto, deletePhoto } = usePhotos()
+  const { photos, archivedPhotos, loading: photosLoading, uploading: photosUploading, selectedPhoto, setSelectedPhoto, uploadPhoto, renamePhoto, archivePhoto, restorePhoto, permanentDeletePhoto, deletePhoto } = usePhotos()
   const { query, setQuery, noteResults, bookmarkResults, loading: searchLoading } = useSearch()
   const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
 
@@ -74,7 +74,7 @@ export function AppShell() {
   const { recents, recordRecent } = useRecents()
   const { vaultItems, loading: vaultLoading, createVaultItem, updateVaultItem, renameVaultItem, reorderVaultItems } = useVaultItems()
 
-  const { bookmarks, loading: bookmarksLoading, createBookmark, archiveBookmark, reorderBookmarks } =
+  const { bookmarks, loading: bookmarksLoading, createBookmark, renameBookmark, archiveBookmark, reorderBookmarks } =
     useBookmarks(activeCollectionId)
 
   useRealtime({
@@ -416,12 +416,13 @@ export function AppShell() {
         mobileView === 'editor' ? 'translate-x-0' : 'translate-x-full',
       )}>
         {photosMode ? (
-          <PhotoViewer photo={selectedPhoto} onMobileBack={handleMobileBack} />
+          <PhotoViewer photo={selectedPhoto} onRename={renamePhoto} onMobileBack={handleMobileBack} />
         ) : activeBookmark ? (
           <BookmarkDetail
             key={activeBookmark.id}
             bookmark={activeBookmark}
             onArchive={handleArchiveBookmark}
+            onRename={(title) => renameBookmark(activeBookmark.id, title)}
             onMobileBack={handleMobileBack}
           />
         ) : activeNote ? (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ExternalLink, Globe, Archive, ChevronLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Bookmark } from '@/types'
@@ -8,6 +8,7 @@ import type { Bookmark } from '@/types'
 interface BookmarkDetailProps {
   bookmark: Bookmark
   onArchive: (id: string) => Promise<void>
+  onRename: (title: string) => void
   onMobileBack?: () => void
 }
 
@@ -19,9 +20,32 @@ function decodeEntities(text: string): string {
     .replace(/&gt;/g, '>').replace(/&apos;/g, "'").replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ')
 }
 
-export function BookmarkDetail({ bookmark, onArchive, onMobileBack }: BookmarkDetailProps) {
+export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: BookmarkDetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const titleInputRef = useRef<HTMLInputElement>(null)
   const title = bookmark.title ? decodeEntities(bookmark.title) : null
+
+  useEffect(() => {
+    if (isEditingTitle) titleInputRef.current?.focus()
+  }, [isEditingTitle])
+
+  function startEditingTitle() {
+    setEditTitle(title ?? bookmark.url)
+    setIsEditingTitle(true)
+  }
+
+  function commitTitle() {
+    const trimmed = editTitle.trim()
+    if (trimmed && trimmed !== title) onRename(trimmed)
+    setIsEditingTitle(false)
+  }
+
+  function handleTitleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') { e.preventDefault(); commitTitle() }
+    if (e.key === 'Escape') setIsEditingTitle(false)
+  }
 
   const date = new Date(bookmark.created_at).toLocaleDateString('en-US', {
     month: 'long',
@@ -54,17 +78,29 @@ export function BookmarkDetail({ bookmark, onArchive, onMobileBack }: BookmarkDe
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-8 py-8 min-h-0">
-        {/* Title — clicks open the URL */}
-        <a
-          href={bookmark.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group block mb-6"
-        >
-          <h1 className="text-lg font-semibold leading-snug text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors break-words">
-            {title || bookmark.url}
-          </h1>
-        </a>
+        {/* Title — double-click to rename, single click opens URL */}
+        {isEditingTitle ? (
+          <input
+            ref={titleInputRef}
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
+            onBlur={commitTitle}
+            onKeyDown={handleTitleKeyDown}
+            className="w-full text-lg font-semibold leading-snug bg-transparent outline-none border-b border-[var(--color-accent)] text-[var(--color-text-primary)] mb-6 pb-1"
+          />
+        ) : (
+          <a
+            href={bookmark.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onDoubleClick={e => { e.preventDefault(); startEditingTitle() }}
+            className="group block mb-6"
+          >
+            <h1 className="text-lg font-semibold leading-snug text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors break-words">
+              {title || bookmark.url}
+            </h1>
+          </a>
+        )}
 
         {/* Meta */}
         <div className="flex flex-col gap-4">

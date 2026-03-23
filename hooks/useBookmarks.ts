@@ -76,6 +76,11 @@ export function useBookmarks(collectionId: string | null) {
     return data
   }, [])
 
+  const renameBookmark = useCallback(async (id: string, title: string) => {
+    setBookmarks(prev => prev.map(b => b.id === id ? { ...b, title } : b))
+    await supabase.from('bookmarks').update({ title }).eq('id', id)
+  }, [])
+
   const archiveBookmark = useCallback(async (id: string) => {
     setBookmarks(prev => prev.filter(b => b.id !== id))
     await supabase.from('bookmarks').update({ archived_at: new Date().toISOString() }).eq('id', id)
@@ -90,5 +95,5 @@ export function useBookmarks(collectionId: string | null) {
     )
   }, [])
 
-  return { bookmarks, loading, error, createBookmark, archiveBookmark, reorderBookmarks }
+  return { bookmarks, loading, error, createBookmark, renameBookmark, archiveBookmark, reorderBookmarks }
 }
