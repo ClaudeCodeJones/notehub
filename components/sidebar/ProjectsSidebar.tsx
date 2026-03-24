@@ -17,6 +17,7 @@ import { CollectionItem } from './CollectionItem'
 import { VaultItem } from './VaultItem'
 import { cn } from '@/lib/utils'
 import type { Project, BookmarkCollection, VaultItem as VaultItemType } from '@/types'
+import type { RecentEntry } from '@/hooks/useRecents'
 
 
 interface ProjectsSidebarProps {
@@ -50,6 +51,7 @@ interface ProjectsSidebarProps {
   searchMode: boolean
   onOpenHome: () => void
   homeMode: boolean
+  recents: RecentEntry[]
 }
 
 export function ProjectsSidebar({
@@ -83,6 +85,7 @@ export function ProjectsSidebar({
   searchMode,
   onOpenHome,
   homeMode,
+  recents,
 }: ProjectsSidebarProps) {
   const [isCreatingProject, setIsCreatingProject] = useState(false)
   const [newProjectName, setNewProjectName] = useState('')
@@ -94,13 +97,28 @@ export function ProjectsSidebar({
   const [showAllVault, setShowAllVault] = useState(false)
   const [showAllCollections, setShowAllCollections] = useState(false)
 
+  function sortByRecent<T extends { id: string; sort_order: number }>(items: T[], type: RecentEntry['type']): T[] {
+    return [...items].sort((a, b) => {
+      const ai = recents.findIndex(r => r.type === type && r.id === a.id)
+      const bi = recents.findIndex(r => r.type === type && r.id === b.id)
+      if (ai === -1 && bi === -1) return a.sort_order - b.sort_order
+      if (ai === -1) return 1
+      if (bi === -1) return -1
+      return ai - bi
+    })
+  }
+
+  const sortedProjects = sortByRecent(projects, 'project')
+  const sortedVaultItems = sortByRecent(vaultItems, 'vault')
+  const sortedCollections = sortByRecent(collections, 'collection')
+
   const VISIBLE_LIMIT = 3
-  const visibleProjects = showAllProjects ? projects : projects.slice(0, VISIBLE_LIMIT)
-  const hasMoreProjects = projects.length > VISIBLE_LIMIT
-  const visibleVaultItems = showAllVault ? vaultItems : vaultItems.slice(0, VISIBLE_LIMIT)
-  const hasMoreVault = vaultItems.length > VISIBLE_LIMIT
-  const visibleCollections = showAllCollections ? collections : collections.slice(0, VISIBLE_LIMIT)
-  const hasMoreCollections = collections.length > VISIBLE_LIMIT
+  const visibleProjects = showAllProjects ? sortedProjects : sortedProjects.slice(0, VISIBLE_LIMIT)
+  const hasMoreProjects = sortedProjects.length > VISIBLE_LIMIT
+  const visibleVaultItems = showAllVault ? sortedVaultItems : sortedVaultItems.slice(0, VISIBLE_LIMIT)
+  const hasMoreVault = sortedVaultItems.length > VISIBLE_LIMIT
+  const visibleCollections = showAllCollections ? sortedCollections : sortedCollections.slice(0, VISIBLE_LIMIT)
+  const hasMoreCollections = sortedCollections.length > VISIBLE_LIMIT
 
   const projectInputRef = useRef<HTMLInputElement>(null)
   const collectionInputRef = useRef<HTMLInputElement>(null)

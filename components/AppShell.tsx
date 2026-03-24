@@ -320,6 +320,7 @@ export function AppShell() {
           searchMode={searchMode}
           onOpenHome={handleOpenHome}
           homeMode={homeMode}
+          recents={recents}
         />
       </div>
 

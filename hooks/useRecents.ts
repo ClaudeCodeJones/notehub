@@ -8,7 +8,7 @@ export interface RecentEntry {
 }
 
 const STORAGE_KEY = 'notehub_recents'
-const MAX_RECENTS = 5
+const MAX_RECENTS = 100
 
 export function useRecents() {
   const [recents, setRecents] = useState<RecentEntry[]>([])
