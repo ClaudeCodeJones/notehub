@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ExternalLink, Globe, Archive, ChevronLeft } from 'lucide-react'
+import { ExternalLink, Globe, Archive, ChevronLeft, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Bookmark } from '@/types'
 
@@ -78,7 +78,7 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-8 py-8 min-h-0">
-        {/* Title — double-click to rename, single click opens URL */}
+        {/* Title */}
         {isEditingTitle ? (
           <input
             ref={titleInputRef}
@@ -89,17 +89,25 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
             className="w-full text-lg font-semibold leading-snug bg-transparent outline-none border-b border-[var(--color-accent)] text-[var(--color-text-primary)] mb-6 pb-1"
           />
         ) : (
-          <a
-            href={bookmark.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onDoubleClick={e => { e.preventDefault(); startEditingTitle() }}
-            className="group block mb-6"
-          >
-            <h1 className="text-lg font-semibold leading-snug text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors break-words">
-              {title || bookmark.url}
-            </h1>
-          </a>
+          <div className="group flex items-start gap-2 mb-6">
+            <a
+              href={bookmark.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <h1 className="text-lg font-semibold leading-snug text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors break-words">
+                {title || bookmark.url}
+              </h1>
+            </a>
+            <button
+              onClick={startEditingTitle}
+              title="Rename"
+              className="opacity-0 group-hover:opacity-100 mt-1 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all flex-shrink-0"
+            >
+              <Pencil size={13} />
+            </button>
+          </div>
         )}
 
         {/* Meta */}

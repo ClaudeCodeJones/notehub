@@ -430,6 +430,7 @@ export function AppShell() {
             key={activeNote.id}
             note={activeNote}
             onUpdate={updateNote}
+            onArchive={handleArchiveNote}
             onMobileBack={handleMobileBack}
           />
         ) : (

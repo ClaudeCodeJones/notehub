@@ -9,7 +9,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Archive } from 'lucide-react'
 import { Toolbar } from './Toolbar'
 import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
@@ -17,12 +17,13 @@ import type { Note } from '@/types'
 interface EditorPanelProps {
   note: Note
   onUpdate: (id: string, updates: Partial<Pick<Note, 'title' | 'content'>>) => Promise<void>
+  onArchive: (id: string) => Promise<void>
   onMobileBack?: () => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved'
 
-export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) {
+export function EditorPanel({ note, onUpdate, onArchive, onMobileBack }: EditorPanelProps) {
   const [title, setTitle] = useState(note.title)
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const titleRef = useRef<HTMLInputElement>(null)
@@ -51,7 +52,7 @@ export function EditorPanel({ note, onUpdate, onMobileBack }: EditorPanelProps) 
         includeChildren: true,
       }),
     ],
-    content: (() => { try { return JSON.parse(note.content) } catch (err) { console.error('Failed to parse note content:', err); return { type: 'doc', content: [{ type: 'paragraph' }] } } })(),
+    content: (() => { try { return JSON.parse(note.content) } catch { return note.content || { type: 'doc', content: [{ type: 'paragraph' }] } } })(),
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
       const json = JSON.stringify(editor.getJSON())
@@ -140,12 +141,19 @@ return (
         />
       </div>
 
-      {/* Footer: save status */}
-      <div className="px-8 py-3 border-t border-[var(--color-border)] flex items-center flex-shrink-0">
+      {/* Footer: save status + archive */}
+      <div className="px-8 py-3 border-t border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <span className="text-xs text-[var(--color-text-muted)]">
           {saveStatus === 'saving' && 'Saving…'}
           {saveStatus === 'saved' && 'Saved'}
         </span>
+        <button
+          onClick={() => onArchive(note.id)}
+          className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
+        >
+          <Archive size={13} />
+          Archive
+        </button>
       </div>
     </div>
   )
