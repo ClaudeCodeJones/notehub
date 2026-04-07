@@ -90,20 +90,13 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
           />
         ) : (
           <div className="group flex items-start gap-2 mb-6">
-            <a
-              href={bookmark.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1"
-            >
-              <h1 className="text-lg font-semibold leading-snug text-[var(--color-text-primary)] hover:text-[var(--color-accent)] transition-colors break-words">
-                {title || bookmark.url}
-              </h1>
-            </a>
+            <h1 className="flex-1 text-lg font-semibold leading-snug text-[var(--color-text-primary)] break-words">
+              {title || bookmark.url}
+            </h1>
             <button
               onClick={startEditingTitle}
               title="Rename"
-              className="opacity-0 group-hover:opacity-100 mt-1 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all flex-shrink-0"
+              className="mt-1 p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors flex-shrink-0"
             >
               <Pencil size={13} />
             </button>

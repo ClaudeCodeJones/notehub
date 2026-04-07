@@ -35,7 +35,7 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
       if (error) setError(error.message)
       else setNotes(data ?? [])
       setLoading(false)
-    }).catch(err => {
+    }, (err: { message?: string }) => {
       setError(err?.message ?? 'Failed to load notes')
       setLoading(false)
     })

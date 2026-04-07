@@ -30,7 +30,7 @@ export function useBookmarks(collectionId: string | null) {
         if (error) setError(error.message)
         else setBookmarks(data ?? [])
         setLoading(false)
-      }).catch(err => {
+      }, (err: { message?: string }) => {
         setError(err?.message ?? 'Failed to load bookmarks')
         setLoading(false)
       })

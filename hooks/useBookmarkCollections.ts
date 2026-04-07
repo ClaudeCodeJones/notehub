@@ -21,7 +21,7 @@ export function useBookmarkCollections() {
         if (error) setError(error.message)
         else setCollections(data ?? [])
         setLoading(false)
-      }).catch(err => {
+      }, (err: { message?: string }) => {
         setError(err?.message ?? 'Failed to load collections')
         setLoading(false)
       })

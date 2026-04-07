@@ -24,7 +24,7 @@ export function useProjects() {
         if (error) setError(error.message)
         else setProjects(data ?? [])
         setLoading(false)
-      }).catch(err => {
+      }, (err: { message?: string }) => {
         setError(err?.message ?? 'Failed to load projects')
         setLoading(false)
       })
