@@ -174,6 +174,20 @@ export function AppShell() {
     setMobileView('notes')
   }
 
+  function handleOpenSectionBrowse(section: 'projects' | 'vault' | 'bookmarks') {
+    setHomeMode(false)
+    setArchiveMode(false)
+    setSearchMode(false)
+    setPhotosMode(false)
+    setActiveProjectId(null)
+    setActiveNoteId(null)
+    setActiveCollectionId(null)
+    setActiveBookmarkId(null)
+    setActiveVaultItemId(null)
+    setFocusedSection(section)
+    setMobileView('sidebar')
+  }
+
   function handleOpenHome() {
     setHomeMode(true)
     setSearchMode(false)
@@ -364,6 +378,7 @@ export function AppShell() {
             onSelectProject={handleSelectProject}
             onSelectCollection={handleSelectCollection}
             onSelectVaultItem={handleSelectVaultItem}
+            onOpenSection={handleOpenSectionBrowse}
             onOpenPhotos={handleOpenPhotos}
             onOpenSearch={handleOpenSearch}
             onCreateProject={handleFabCreateProject}

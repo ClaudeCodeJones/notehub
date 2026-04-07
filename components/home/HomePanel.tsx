@@ -172,6 +172,7 @@ interface HomePanelProps {
   onSelectProject: (id: string) => void
   onSelectCollection: (id: string) => void
   onSelectVaultItem: (id: string) => void
+  onOpenSection: (section: 'projects' | 'vault' | 'bookmarks') => void
   onOpenPhotos: () => void
   onOpenSearch: () => void
   onCreateProject: () => void
@@ -189,6 +190,7 @@ export function HomePanel({
   onSelectProject,
   onSelectCollection,
   onSelectVaultItem,
+  onOpenSection,
   onOpenPhotos,
   onOpenSearch,
   onCreateProject,
@@ -261,7 +263,7 @@ export function HomePanel({
                 sub="Notes & docs"
                 count={loading ? undefined : projects.length}
                 tint={CARD_TINTS.projects}
-                onClick={() => projects[0] && onSelectProject(projects[0].id)}
+                onClick={() => onOpenSection('projects')}
                 disabled={!loading && projects.length === 0}
                 loading={loading}
               />
@@ -271,7 +273,7 @@ export function HomePanel({
                 sub="Private files"
                 count={loading ? undefined : vaultItems.length}
                 tint={CARD_TINTS.vault}
-                onClick={() => vaultItems[0] && onSelectVaultItem(vaultItems[0].id)}
+                onClick={() => onOpenSection('vault')}
                 disabled={!loading && vaultItems.length === 0}
                 loading={loading}
               />
@@ -281,7 +283,7 @@ export function HomePanel({
                 sub="Saved links"
                 count={loading ? undefined : collections.length}
                 tint={CARD_TINTS.bookmarks}
-                onClick={() => collections[0] && onSelectCollection(collections[0].id)}
+                onClick={() => onOpenSection('bookmarks')}
                 disabled={!loading && collections.length === 0}
                 loading={loading}
               />
