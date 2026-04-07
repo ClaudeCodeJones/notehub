@@ -26,6 +26,7 @@ export function useSearch() {
   const [noteResults, setNoteResults] = useState<NoteResult[]>([])
   const [bookmarkResults, setBookmarkResults] = useState<BookmarkResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!query.trim()) {
@@ -53,8 +54,10 @@ export function useSearch() {
             .order('updated_at', { ascending: false })
             .limit(20),
         ])
-        setNoteResults(notesRes.data ?? [])
-        setBookmarkResults(bookmarksRes.data ?? [])
+        if (notesRes.error) setError(notesRes.error.message)
+        else setNoteResults(notesRes.data ?? [])
+        if (bookmarksRes.error) setError(bookmarksRes.error.message)
+        else setBookmarkResults(bookmarksRes.data ?? [])
       } finally {
         setLoading(false)
       }
@@ -63,5 +66,5 @@ export function useSearch() {
     return () => clearTimeout(timer)
   }, [query])
 
-  return { query, setQuery, noteResults, bookmarkResults, loading }
+  return { query, setQuery, noteResults, bookmarkResults, loading, error }
 }

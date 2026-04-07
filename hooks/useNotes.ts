@@ -35,6 +35,9 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
       if (error) setError(error.message)
       else setNotes(data ?? [])
       setLoading(false)
+    }).catch(err => {
+      setError(err?.message ?? 'Failed to load notes')
+      setLoading(false)
     })
   }, [projectId, vaultId])
 
@@ -101,7 +104,9 @@ export function useNotes(projectId: string | null, vaultId?: string | null) {
   const insertFromRealtime = useCallback((inserted: Note) => {
     setNotes(prev => {
       if (prev.some(n => n.id === inserted.id)) return prev
-      if (inserted.project_id !== projectIdRef.current) return prev
+      const matchesProject = inserted.project_id !== null && inserted.project_id === projectIdRef.current
+      const matchesVault = inserted.vault_id !== null && inserted.vault_id === vaultIdRef.current
+      if (!matchesProject && !matchesVault) return prev
       return [...prev, inserted].sort((a, b) => a.sort_order - b.sort_order)
     })
   }, [])

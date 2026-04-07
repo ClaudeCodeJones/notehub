@@ -27,6 +27,7 @@ import type { Photo } from '@/hooks/usePhotos'
 import type { NoteResult, BookmarkResult } from '@/hooks/useSearch'
 
 type MobileView = 'sidebar' | 'notes' | 'editor'
+type FocusedSection = 'projects' | 'vault' | 'bookmarks' | 'photos' | null
 
 export function AppShell() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null)
@@ -38,6 +39,7 @@ export function AppShell() {
   const [photosMode, setPhotosMode] = useState(false)
   const [searchMode, setSearchMode] = useState(false)
   const [homeMode, setHomeMode] = useState(true)
+  const [focusedSection, setFocusedSection] = useState<FocusedSection>(null)
   const { photos, archivedPhotos, loading: photosLoading, uploading: photosUploading, selectedPhoto, setSelectedPhoto, uploadPhoto, renamePhoto, archivePhoto, restorePhoto, permanentDeletePhoto, deletePhoto } = usePhotos()
   const { query, setQuery, noteResults, bookmarkResults, loading: searchLoading } = useSearch()
   const [activeVaultItemId, setActiveVaultItemId] = useState<string | null>(null)
@@ -70,7 +72,7 @@ export function AppShell() {
     deleteFromRealtime: deleteNote_rt,
   } = useNotes(activeProjectId, activeVaultItemId)
 
-  const { collections, loading: collectionsLoading, createCollection, reorderCollections, updateBookmarkCollection } = useBookmarkCollections()
+  const { collections, loading: collectionsLoading, createCollection, reorderCollections, updateBookmarkCollection, renameCollection } = useBookmarkCollections()
   const { recents, recordRecent } = useRecents()
   const { vaultItems, loading: vaultLoading, createVaultItem, updateVaultItem, renameVaultItem, reorderVaultItems } = useVaultItems()
 
@@ -102,6 +104,7 @@ export function AppShell() {
     setPhotosMode(false)
     setSearchMode(false)
     setHomeMode(false)
+    setFocusedSection('projects')
     setMobileView('notes')
     recordRecent({ id, type: 'project' })
   }
@@ -116,6 +119,7 @@ export function AppShell() {
     setPhotosMode(false)
     setSearchMode(false)
     setHomeMode(false)
+    setFocusedSection('bookmarks')
     setMobileView('notes')
     recordRecent({ id, type: 'collection' })
   }
@@ -130,6 +134,7 @@ export function AppShell() {
     setPhotosMode(false)
     setSearchMode(false)
     setHomeMode(false)
+    setFocusedSection('vault')
     setMobileView('notes')
     recordRecent({ id, type: 'vault' })
   }
@@ -139,6 +144,7 @@ export function AppShell() {
     setArchiveMode(false)
     setSearchMode(false)
     setHomeMode(false)
+    setFocusedSection('photos')
     setMobileView('notes')
   }
 
@@ -178,7 +184,15 @@ export function AppShell() {
     setActiveCollectionId(null)
     setActiveBookmarkId(null)
     setActiveVaultItemId(null)
+    setFocusedSection(null)
     setMobileView('notes')
+  }
+
+  function handleSwitchSection(section: FocusedSection) {
+    if (section === 'projects' && projects[0]) handleSelectProject(projects[0].id)
+    else if (section === 'vault' && vaultItems[0]) handleSelectVaultItem(vaultItems[0].id)
+    else if (section === 'bookmarks' && collections[0]) handleSelectCollection(collections[0].id)
+    else if (section === 'photos') handleOpenPhotos()
   }
 
   function handleSelectNote(id: string) {
@@ -201,10 +215,12 @@ export function AppShell() {
     if (note.project_id) {
       setActiveProjectId(note.project_id)
       setActiveVaultItemId(null)
+      setFocusedSection('projects')
       recordRecent({ id: note.project_id, type: 'project' })
     } else if (note.vault_id) {
       setActiveVaultItemId(note.vault_id)
       setActiveProjectId(null)
+      setFocusedSection('vault')
       recordRecent({ id: note.vault_id, type: 'vault' })
     }
     setMobileView('editor')
@@ -219,6 +235,7 @@ export function AppShell() {
     setActiveVaultItemId(null)
     setArchiveMode(false)
     setPhotosMode(false)
+    setFocusedSection('bookmarks')
     setMobileView('editor')
     recordRecent({ id: bookmark.collection_id, type: 'collection' })
   }
@@ -304,6 +321,7 @@ export function AppShell() {
           onCreateCollection={createCollection}
           onReorderCollections={reorderCollections}
           onUpdateCollection={updateBookmarkCollection}
+          onRenameCollection={renameCollection}
           vaultItems={vaultItems}
           activeVaultItemId={activeVaultItemId}
           onSelectVaultItem={handleSelectVaultItem}
@@ -321,6 +339,8 @@ export function AppShell() {
           onOpenHome={handleOpenHome}
           homeMode={homeMode}
           recents={recents}
+          focusedSection={focusedSection}
+          onSwitchSection={handleSwitchSection}
         />
       </div>
 

@@ -84,35 +84,31 @@ export function usePhotos() {
   const archivePhoto = useCallback(async (name: string) => {
     const { error } = await supabase.storage.from('photos').move(name, `archived/${name}`)
     if (error) { console.error('Failed to archive photo:', error); return }
-    setPhotos(prev => {
-      const photo = prev.find(p => p.name === name)
-      if (photo) {
-        setArchivedPhotos(a => [{
-          name: photo.name,
-          url: supabase.storage.from('photos').getPublicUrl(`archived/${name}`).data.publicUrl,
-          created_at: photo.created_at,
-        }, ...a])
-      }
-      return prev.filter(p => p.name !== name)
-    })
+    const photo = photos.find(p => p.name === name)
+    setPhotos(prev => prev.filter(p => p.name !== name))
+    if (photo) {
+      setArchivedPhotos(prev => [{
+        name: photo.name,
+        url: supabase.storage.from('photos').getPublicUrl(`archived/${name}`).data.publicUrl,
+        created_at: photo.created_at,
+      }, ...prev])
+    }
     setSelectedPhoto(prev => prev?.name === name ? null : prev)
-  }, [])
+  }, [photos])
 
   const restorePhoto = useCallback(async (name: string) => {
     const { error } = await supabase.storage.from('photos').move(`archived/${name}`, name)
     if (error) { console.error('Failed to restore photo:', error); return }
-    setArchivedPhotos(prev => {
-      const photo = prev.find(p => p.name === name)
-      if (photo) {
-        setPhotos(a => [{
-          name: photo.name,
-          url: supabase.storage.from('photos').getPublicUrl(name).data.publicUrl,
-          created_at: photo.created_at,
-        }, ...a])
-      }
-      return prev.filter(p => p.name !== name)
-    })
-  }, [])
+    const photo = archivedPhotos.find(p => p.name === name)
+    setArchivedPhotos(prev => prev.filter(p => p.name !== name))
+    if (photo) {
+      setPhotos(prev => [{
+        name: photo.name,
+        url: supabase.storage.from('photos').getPublicUrl(name).data.publicUrl,
+        created_at: photo.created_at,
+      }, ...prev])
+    }
+  }, [archivedPhotos])
 
   const permanentDeletePhoto = useCallback(async (name: string) => {
     const { error } = await supabase.storage.from('photos').remove([`archived/${name}`])

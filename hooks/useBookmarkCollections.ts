@@ -21,6 +21,9 @@ export function useBookmarkCollections() {
         if (error) setError(error.message)
         else setCollections(data ?? [])
         setLoading(false)
+      }).catch(err => {
+        setError(err?.message ?? 'Failed to load collections')
+        setLoading(false)
       })
   }, [])
 
@@ -50,5 +53,10 @@ export function useBookmarkCollections() {
     await supabase.from('bookmark_collections').update({ color }).eq('id', id)
   }, [])
 
-  return { collections, loading, error, createCollection, reorderCollections, updateBookmarkCollection }
+  const renameCollection = useCallback(async (id: string, name: string) => {
+    setCollections(prev => prev.map(c => c.id === id ? { ...c, name } : c))
+    await supabase.from('bookmark_collections').update({ name }).eq('id', id)
+  }, [])
+
+  return { collections, loading, error, createCollection, reorderCollections, updateBookmarkCollection, renameCollection }
 }

@@ -59,19 +59,23 @@ export function EditorPanel({ note, onUpdate, onArchive, onMobileBack }: EditorP
       if (contentTimer.current) clearTimeout(contentTimer.current)
       setSaveStatus('saving')
       contentTimer.current = setTimeout(async () => {
-        await onUpdate(note.id, { content: json })
-        setSaveStatus('saved')
-        setTimeout(() => setSaveStatus('idle'), 2000)
+        try {
+          await onUpdate(note.id, { content: json })
+          setSaveStatus('saved')
+          setTimeout(() => setSaveStatus('idle'), 2000)
+        } catch {
+          setSaveStatus('idle')
+        }
       }, 600)
     },
   })
 
-  // Focus title for new blank notes
+  // Focus title for new blank notes (on mount only)
   useEffect(() => {
     if (!note.title && !note.content) {
       titleRef.current?.focus()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once on mount
   }, [])
 
   // Cleanup timers on unmount
@@ -88,9 +92,13 @@ export function EditorPanel({ note, onUpdate, onArchive, onMobileBack }: EditorP
     if (titleTimer.current) clearTimeout(titleTimer.current)
     setSaveStatus('saving')
     titleTimer.current = setTimeout(async () => {
-      await onUpdate(note.id, { title: value })
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 2000)
+      try {
+        await onUpdate(note.id, { title: value })
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } catch {
+        setSaveStatus('idle')
+      }
     }, 600)
   }
 
@@ -104,7 +112,7 @@ export function EditorPanel({ note, onUpdate, onArchive, onMobileBack }: EditorP
 return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-primary)] h-full overflow-hidden">
       {/* Mobile header */}
-      <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] flex-shrink-0">
+      {onMobileBack && <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] flex-shrink-0">
         <button
           onClick={onMobileBack}
           className="p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
@@ -114,7 +122,7 @@ return (
         <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
           {title || 'Untitled'}
         </span>
-      </div>
+      </div>}
 
       {/* Formatting toolbar */}
       <Toolbar editor={editor} noteType={note.note_type} />
