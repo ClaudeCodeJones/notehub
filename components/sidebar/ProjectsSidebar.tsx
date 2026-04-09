@@ -227,17 +227,7 @@ export function ProjectsSidebar({
             width={280}
             height={96}
             quality={100}
-            className="h-20 w-auto dark:hidden"
-            style={{ objectFit: 'contain' }}
-            priority
-          />
-          <Image
-            src="/notehub_newlogo_white.png"
-            alt="NoteHUB"
-            width={280}
-            height={96}
-            quality={100}
-            className="h-20 w-auto hidden dark:block"
+            className="h-20 w-auto"
             style={{ objectFit: 'contain' }}
             priority
           />
