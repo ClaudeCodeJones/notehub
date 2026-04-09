@@ -224,7 +224,7 @@ export function HomePanel({
       <div className="h-24 flex items-center flex-shrink-0 bg-[var(--color-accent)] shadow-sm">
         <div className="max-w-4xl mx-auto px-6 w-full flex items-center justify-between">
           <Image
-            src="/notehub_logo_white.png"
+            src="/notehub_newlogo_white.png"
             alt="NoteHUB"
             width={260}
             height={88}

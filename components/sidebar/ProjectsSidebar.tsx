@@ -222,12 +222,22 @@ export function ProjectsSidebar({
       <div className="px-4 py-1 border-b border-[var(--color-border)] flex items-center">
         <button onClick={onOpenHome} className="cursor-pointer focus:outline-none">
           <Image
-            src="/notehub_logo_v6.png"
+            src="/notehub_newlogo_colour.png"
             alt="NoteHUB"
             width={280}
             height={96}
             quality={100}
-            className="h-20 w-auto"
+            className="h-20 w-auto dark:hidden"
+            style={{ objectFit: 'contain' }}
+            priority
+          />
+          <Image
+            src="/notehub_newlogo_white.png"
+            alt="NoteHUB"
+            width={280}
+            height={96}
+            quality={100}
+            className="h-20 w-auto hidden dark:block"
             style={{ objectFit: 'contain' }}
             priority
           />
