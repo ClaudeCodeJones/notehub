@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Upload, X, ImageIcon } from 'lucide-react'
+import { AppHeader } from '@/components/AppHeader'
 import { cn } from '@/lib/utils'
 import type { Photo } from '@/hooks/usePhotos'
 
@@ -27,32 +28,24 @@ export function PhotosPanel({ photos, loading, uploading, onUpload, onDelete, on
 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-primary)] h-full overflow-hidden">
-      {/* Header */}
-      <div className="px-8 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <ImageIcon size={18} className="text-[var(--color-text-muted)]" />
-          <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Photos</h2>
-          {uploading && (
-            <span className="text-xs text-[var(--color-text-muted)]">Uploading…</span>
-          )}
-        </div>
+      <AppHeader>
         <div className="flex items-center gap-2">
           <button
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/20 text-white hover:bg-white/30 transition-colors disabled:opacity-50"
           >
             <Upload size={14} />
             Upload
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+            className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X size={16} />
           </button>
         </div>
-      </div>
+      </AppHeader>
 
       <input
         ref={inputRef}

@@ -203,10 +203,13 @@ export function AppShell() {
   }
 
   function handleSwitchSection(section: FocusedSection) {
-    if (section === 'projects' && projects[0]) handleSelectProject(projects[0].id)
-    else if (section === 'vault' && vaultItems[0]) handleSelectVaultItem(vaultItems[0].id)
-    else if (section === 'bookmarks' && collections[0]) handleSelectCollection(collections[0].id)
-    else if (section === 'photos') handleOpenPhotos()
+    setFocusedSection(section)
+    setActiveNoteId(null)
+    setActiveProjectId(null)
+    setActiveCollectionId(null)
+    setActiveBookmarkId(null)
+    setActiveVaultItemId(null)
+    if (section === 'photos') handleOpenPhotos()
   }
 
   function handleSelectNote(id: string) {

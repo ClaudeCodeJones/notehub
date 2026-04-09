@@ -10,12 +10,12 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-import Image from 'next/image'
 import { Plus, FolderOpen, Bookmark, Archive, Vault, Search, House, Image as ImageIcon } from 'lucide-react'
 import { ProjectItem } from './ProjectItem'
 import { CollectionItem } from './CollectionItem'
 import { VaultItem } from './VaultItem'
 import { cn } from '@/lib/utils'
+import { AppHeader } from '@/components/AppHeader'
 import type { Project, BookmarkCollection, VaultItem as VaultItemType } from '@/types'
 import type { RecentEntry } from '@/hooks/useRecents'
 
@@ -218,21 +218,11 @@ export function ProjectsSidebar({
 
   return (
     <aside className="w-full md:w-[280px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-primary)] h-full" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2rem)' }}>
-      {/* Logo — click to return to Home */}
-      <div className="px-4 py-1 border-b border-[var(--color-border)] flex items-center">
-        <button onClick={onOpenHome} className="cursor-pointer focus:outline-none">
-          <Image
-            src="/notehub_newlogo_colour.png"
-            alt="NoteHUB"
-            width={280}
-            height={96}
-            quality={100}
-            className="h-14 w-auto"
-            style={{ objectFit: 'contain' }}
-            priority
-          />
-        </button>
-      </div>
+      {/* Header */}
+      <button onClick={onOpenHome} className="cursor-pointer focus:outline-none">
+        <AppHeader />
+      </button>
+      <div className="h-4" />
 
       {/* Section switcher — visible only when inside a focused section */}
       {focusedSection !== null && (

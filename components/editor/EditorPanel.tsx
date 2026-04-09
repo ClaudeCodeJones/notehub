@@ -11,6 +11,7 @@ import { Color } from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
 import { ChevronLeft, Archive } from 'lucide-react'
 import { Toolbar } from './Toolbar'
+import { AppHeader } from '@/components/AppHeader'
 import { cn } from '@/lib/utils'
 import type { Note } from '@/types'
 
@@ -111,18 +112,16 @@ export function EditorPanel({ note, onUpdate, onArchive, onMobileBack }: EditorP
 
 return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-primary)] h-full overflow-hidden">
-      {/* Mobile header */}
-      {onMobileBack && <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] flex-shrink-0">
-        <button
-          onClick={onMobileBack}
-          className="p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
-          {title || 'Untitled'}
-        </span>
-      </div>}
+      <AppHeader>
+        {onMobileBack && (
+          <button
+            onClick={onMobileBack}
+            className="md:hidden p-1 rounded-md text-white/70 hover:text-white transition-colors flex-shrink-0"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+      </AppHeader>
 
       {/* Formatting toolbar */}
       <Toolbar editor={editor} noteType={note.note_type} />
