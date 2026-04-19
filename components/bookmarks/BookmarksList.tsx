@@ -120,12 +120,12 @@ export function BookmarksList({
           <div className="px-3 py-3 border-b border-[var(--color-border)]">
             <input
               ref={inputRef}
-              type="url"
+              type="text"
               value={newUrl}
               onChange={e => setNewUrl(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleSubmit}
-              placeholder="Paste a URL…"
+              placeholder="Paste URL or type a note…"
               className="w-full text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] rounded-lg px-3 py-2 outline-none ring-2 ring-[var(--color-accent)] placeholder:text-[var(--color-text-muted)]"
             />
           </div>

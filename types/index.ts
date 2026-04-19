@@ -43,7 +43,7 @@ export interface BookmarkCollection {
 export interface Bookmark {
   id: string
   collection_id: string
-  url: string
+  url: string | null
   title: string | null
   domain: string | null
   sort_order: number

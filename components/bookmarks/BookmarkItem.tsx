@@ -46,9 +46,9 @@ export function BookmarkItem({ bookmark, isActive, onSelect, onArchive }: Bookma
       )}
     >
       <p className="text-sm font-medium text-[var(--color-text-primary)] truncate pr-6">
-        {title || bookmark.url}
+        {title || bookmark.url || 'Untitled note'}
       </p>
-      {bookmark.domain && (
+      {bookmark.url && bookmark.domain && (
         <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{bookmark.domain}</p>
       )}
       <button

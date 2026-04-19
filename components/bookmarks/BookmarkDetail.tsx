@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ExternalLink, Globe, Archive, ChevronLeft, Pencil } from 'lucide-react'
+import { ExternalLink, Globe, Archive, ChevronLeft, Pencil, StickyNote } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Bookmark } from '@/types'
 
@@ -32,7 +32,7 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
   }, [isEditingTitle])
 
   function startEditingTitle() {
-    setEditTitle(title ?? bookmark.url)
+    setEditTitle(title ?? bookmark.url ?? '')
     setIsEditingTitle(true)
   }
 
@@ -72,7 +72,7 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
           <ChevronLeft size={20} />
         </button>
         <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
-          {title || bookmark.url}
+          {title || bookmark.url || 'Untitled note'}
         </span>
       </div>
 
@@ -90,8 +90,11 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
           />
         ) : (
           <div className="group flex items-start gap-2 mb-6">
+            {!bookmark.url && (
+              <StickyNote size={18} className="mt-1 flex-shrink-0 text-[var(--color-text-muted)]" />
+            )}
             <h1 className="flex-1 text-lg font-semibold leading-snug text-[var(--color-text-primary)] break-words">
-              {title || bookmark.url}
+              {title || bookmark.url || 'Untitled note'}
             </h1>
             <button
               onClick={startEditingTitle}
@@ -106,23 +109,25 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
         {/* Meta */}
         <div className="flex flex-col gap-4">
           {/* Full URL */}
-          <div className="flex items-start gap-3">
-            <ExternalLink
-              size={14}
-              className="mt-0.5 flex-shrink-0 text-[var(--color-text-muted)]"
-            />
-            <a
-              href={bookmark.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] break-all transition-colors"
-            >
-              {bookmark.url}
-            </a>
-          </div>
+          {bookmark.url && (
+            <div className="flex items-start gap-3">
+              <ExternalLink
+                size={14}
+                className="mt-0.5 flex-shrink-0 text-[var(--color-text-muted)]"
+              />
+              <a
+                href={bookmark.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] break-all transition-colors"
+              >
+                {bookmark.url}
+              </a>
+            </div>
+          )}
 
           {/* Domain */}
-          {bookmark.domain && (
+          {bookmark.url && bookmark.domain && (
             <div className="flex items-center gap-3">
               <Globe size={14} className="flex-shrink-0 text-[var(--color-text-muted)]" />
               <span className="text-sm text-[var(--color-text-secondary)]">

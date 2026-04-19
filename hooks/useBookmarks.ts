@@ -36,39 +36,49 @@ export function useBookmarks(collectionId: string | null) {
       })
   }, [collectionId])
 
-  const createBookmark = useCallback(async (url: string): Promise<Bookmark | null> => {
+  const createBookmark = useCallback(async (input: string): Promise<Bookmark | null> => {
     const cid = collectionIdRef.current
     if (!cid) return null
 
-    const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`
+    const trimmed = input.trim()
+    if (!trimmed) return null
 
-    let title: string | null = normalizedUrl
-    let domain: string | null = null
+    const looksLikeUrl = !/\s/.test(trimmed) && /^(https?:\/\/|[\w.-]+\.[a-zA-Z]{2,})(\/|$)/i.test(trimmed)
 
-    try {
-      domain = new URL(normalizedUrl).hostname.replace(/^www\./, '')
-    } catch (err) {
-      console.error('Failed to parse URL hostname:', err)
-    }
+    let payload: { url: string | null; title: string | null; domain: string | null }
 
-    try {
-      const res = await fetch(`/api/fetch-title?url=${encodeURIComponent(normalizedUrl)}`)
-      if (res.ok) {
-        const json = (await res.json()) as { title: string; domain: string }
-        title = json.title
-        domain = json.domain
+    if (looksLikeUrl) {
+      const normalizedUrl = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+      let title: string | null = normalizedUrl
+      let domain: string | null = null
+
+      try {
+        domain = new URL(normalizedUrl).hostname.replace(/^www\./, '')
+      } catch (err) {
+        console.error('Failed to parse URL hostname:', err)
       }
-    } catch (err) {
-      console.error('Failed to fetch bookmark title:', err)
+
+      try {
+        const res = await fetch(`/api/fetch-title?url=${encodeURIComponent(normalizedUrl)}`)
+        if (res.ok) {
+          const json = (await res.json()) as { title: string; domain: string }
+          title = json.title
+          domain = json.domain
+        }
+      } catch (err) {
+        console.error('Failed to fetch bookmark title:', err)
+      }
+
+      payload = { url: normalizedUrl, title, domain }
+    } else {
+      payload = { url: null, title: trimmed, domain: null }
     }
 
     const { data, error } = await supabase
       .from('bookmarks')
       .insert({
         collection_id: cid,
-        url: normalizedUrl,
-        title,
-        domain,
+        ...payload,
         sort_order: lengthRef.current,
       })
       .select()
