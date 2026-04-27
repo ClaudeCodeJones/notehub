@@ -112,15 +112,27 @@ export function EditorPanel({ note, onUpdate, onArchive, onMobileBack }: EditorP
 
 return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-primary)] h-full overflow-hidden">
-      <AppHeader>
-        {onMobileBack && (
-          <button
-            onClick={onMobileBack}
-            className="md:hidden p-1 rounded-md text-white/70 hover:text-white transition-colors flex-shrink-0"
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
+      <AppHeader
+        leftContent={
+          onMobileBack && (
+            <button
+              onClick={onMobileBack}
+              aria-label="Back"
+              className="md:hidden p-2 -ml-1 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+            >
+              <ChevronLeft size={24} />
+            </button>
+          )
+        }
+      >
+        <button
+          onClick={() => onArchive(note.id)}
+          aria-label="Archive note"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg text-sm text-white/85 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <Archive size={16} />
+          <span className="hidden sm:inline">Archive</span>
+        </button>
       </AppHeader>
 
       {/* Formatting toolbar */}
@@ -148,19 +160,12 @@ return (
         />
       </div>
 
-      {/* Footer: save status + archive */}
-      <div className="px-8 py-3 border-t border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
+      {/* Footer: save status */}
+      <div className="px-8 py-3 border-t border-[var(--color-border)] flex items-center flex-shrink-0">
         <span className="text-xs text-[var(--color-text-muted)]">
           {saveStatus === 'saving' && 'Saving…'}
           {saveStatus === 'saved' && 'Saved'}
         </span>
-        <button
-          onClick={() => onArchive(note.id)}
-          className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-red-500 transition-colors"
-        >
-          <Archive size={13} />
-          Archive
-        </button>
       </div>
     </div>
   )

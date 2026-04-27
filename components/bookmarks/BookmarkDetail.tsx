@@ -67,9 +67,9 @@ export function BookmarkDetail({ bookmark, onArchive, onRename, onMobileBack }: 
       <div className="md:hidden flex items-center gap-2 px-4 py-3 border-b border-[var(--color-border)] flex-shrink-0">
         <button
           onClick={onMobileBack}
-          className="p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
+          className="p-2 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={24} />
         </button>
         <span className="text-sm font-semibold text-[var(--color-text-primary)] truncate">
           {title || bookmark.url || 'Untitled note'}

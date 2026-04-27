@@ -42,9 +42,9 @@ export function PhotoList({ photos, loading, uploading, selectedPhoto, onSelectP
           {onMobileBack && (
             <button
               onClick={onMobileBack}
-              className="md:hidden p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
+              className="md:hidden p-2 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={24} />
             </button>
           )}
           <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Photos</h2>

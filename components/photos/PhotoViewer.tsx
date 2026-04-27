@@ -57,9 +57,9 @@ export function PhotoViewer({ photo, onRename, onMobileBack }: PhotoViewerProps)
         {onMobileBack && (
           <button
             onClick={onMobileBack}
-            className="md:hidden p-1 -ml-1 mr-2 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
+            className="md:hidden p-2 -ml-1 mr-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors flex-shrink-0"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={24} />
           </button>
         )}
         {isEditing ? (

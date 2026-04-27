@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import {
   DndContext,
   closestCenter,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -52,18 +53,23 @@ export function NotesList({
 }: NotesListProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
+  const mobilePickerRef = useRef<HTMLDivElement>(null)
 
   const pinnedNotes = notes.filter(n => n.pinned)
   const unpinnedNotes = notes.filter(n => !n.pinned)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } })
   )
 
   useEffect(() => {
     if (!pickerOpen) return
     function handleOutside(e: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) setPickerOpen(false)
+      const target = e.target as Node
+      const insideDesktop = pickerRef.current?.contains(target)
+      const insideMobile = mobilePickerRef.current?.contains(target)
+      if (!insideDesktop && !insideMobile) setPickerOpen(false)
     }
     document.addEventListener('mousedown', handleOutside)
     return () => document.removeEventListener('mousedown', handleOutside)
@@ -84,22 +90,22 @@ export function NotesList({
   }
 
   return (
-    <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[#e8e8e8] h-full">
+    <div className="relative w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[#e8e8e8] h-full">
       {/* Header */}
       <div className="relative px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <div className="absolute left-0 top-0 bottom-0 w-1 rounded-sm" style={{ backgroundColor: project.color }} />
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onMobileBack}
-            className="md:hidden p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
+            className="md:hidden p-2 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={24} />
           </button>
           <h2 className="text-lg font-bold text-[var(--color-text-primary)] truncate">
             {project.name}
           </h2>
         </div>
-        <div ref={pickerRef} className="relative flex-shrink-0">
+        <div ref={pickerRef} className="relative flex-shrink-0 hidden md:block">
           <button
             onClick={() => setPickerOpen(v => !v)}
             title="New note"
@@ -190,6 +196,35 @@ export function NotesList({
             )}
           </>
         )}
+      </div>
+
+      {/* Mobile FAB */}
+      <div ref={mobilePickerRef} className="md:hidden">
+        {pickerOpen && (
+          <div
+            className="absolute right-5 flex flex-col gap-0.5 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-xl shadow-lg p-1.5 w-44 z-30"
+            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' }}
+          >
+            {NOTE_TYPE_OPTIONS.map(({ type, icon: Icon, label }) => (
+              <button
+                key={type}
+                onClick={() => { onCreateNote(type); setPickerOpen(false) }}
+                className="flex items-center gap-2.5 w-full px-2.5 py-3 rounded-lg text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-bg-secondary)] transition-colors"
+              >
+                <Icon size={16} className="text-[var(--color-accent)] flex-shrink-0" />
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => setPickerOpen(v => !v)}
+          aria-label="New note"
+          className="absolute right-5 w-14 h-14 rounded-full bg-[var(--color-accent)] text-white shadow-lg flex items-center justify-center hover:bg-[var(--color-accent-hover)] active:scale-95 transition-all z-30"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
+        >
+          <Plus size={26} className={cn('transition-transform duration-200', pickerOpen && 'rotate-45')} />
+        </button>
       </div>
     </div>
   )

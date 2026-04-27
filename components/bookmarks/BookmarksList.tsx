@@ -90,16 +90,16 @@ export function BookmarksList({
   }
 
   return (
-    <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
+    <div className="relative w-full md:w-[320px] flex-shrink-0 flex flex-col border-r border-[var(--color-border)] bg-[var(--color-bg-secondary)] h-full">
       {/* Header */}
       <div className="relative px-4 h-[88px] border-b border-[var(--color-border)] flex items-center justify-between flex-shrink-0">
         <div className="absolute left-0 top-0 bottom-0 w-1 rounded-sm" style={{ backgroundColor: collection.color }} />
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onMobileBack}
-            className="md:hidden p-1 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
+            className="md:hidden p-2 -ml-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={24} />
           </button>
           <h2 className="text-lg font-bold text-[var(--color-text-primary)] truncate">
             {collection.name}
@@ -107,8 +107,8 @@ export function BookmarksList({
         </div>
         <button
           onClick={startAdding}
-          title="Add bookmark"
-          className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
+          title="Add bookmark or note"
+          className="hidden md:block p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors flex-shrink-0"
         >
           <Plus size={16} />
         </button>
@@ -168,6 +168,16 @@ export function BookmarksList({
           </DndContext>
         )}
       </div>
+
+      {/* Mobile FAB */}
+      <button
+        onClick={startAdding}
+        aria-label="Add bookmark or note"
+        className="md:hidden absolute right-5 w-14 h-14 rounded-full bg-[var(--color-accent)] text-white shadow-lg flex items-center justify-center hover:bg-[var(--color-accent-hover)] active:scale-95 transition-all z-30"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 1.25rem)' }}
+      >
+        <Plus size={26} />
+      </button>
     </div>
   )
 }
